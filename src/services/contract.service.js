@@ -13,7 +13,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * */
 
-const CreateContract = async (contractData) => {
+const createContract = async (contractData) => {
   const connection = await db.getConnection();
 
   try {
@@ -62,7 +62,7 @@ const CreateContract = async (contractData) => {
  *
  */
 
-const GetContractById = async (contractId) => {
+const getContractById = async (contractId) => {
   const connection = await db.getConnection();
 
   try {
@@ -94,7 +94,7 @@ const GetContractById = async (contractId) => {
  *
  */
 
-const GetContracts = async (limit, offset) => {
+const getContracts = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -123,7 +123,7 @@ const GetContracts = async (limit, offset) => {
  *
  */
 
-const UpdateContract = async (contractId, contractData) => {
+const updateContract = async (contractId, contractData) => {
   const connection = await db.getConnection();
 
   try {
@@ -176,7 +176,7 @@ const UpdateContract = async (contractId, contractData) => {
  *
  */
 
-const DeleteContract = async (contractId) => {
+const deleteContract = async (contractId) => {
   const connection = await db.getConnection();
 
   try {
@@ -203,9 +203,9 @@ const DeleteContract = async (contractId) => {
 };
 
 module.exports = {
-  CreateContract,
-  GetContractById,
-  GetContracts,
-  UpdateContract,
-  DeleteContract,
+  createContract,
+  getContractById,
+  getContracts,
+  updateContract,
+  deleteContract,
 };

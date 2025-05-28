@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  * @throws {ApiError} - If there is an error during the insertion
  * */
 
-const CreateInvoiceDetail = async (invoiceDetailData) => {
+const createInvoiceDetail = async (invoiceDetailData) => {
   const connection = await db.getConnection();
 
   try {
@@ -60,7 +60,7 @@ const CreateInvoiceDetail = async (invoiceDetailData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetInvoiceDetailById = async (invoiceDetailId) => {
+const getInvoiceDetailById = async (invoiceDetailId) => {
   const connection = await db.getConnection();
 
   try {
@@ -87,7 +87,7 @@ const GetInvoiceDetailById = async (invoiceDetailId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetInvoiceDetailsByInvoiceId = async (invoiceId) => {
+const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
   const connection = await db.getConnection();
 
   try {
@@ -110,7 +110,7 @@ const GetInvoiceDetailsByInvoiceId = async (invoiceId) => {
   }
 };
 
-const UpdateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
+const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
     const connection = await db.getConnection();
     
     try {
@@ -158,7 +158,7 @@ const UpdateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
  * @throws {ApiError} - If there is an error during the deletion
  * */
 
-const DeleteInvoiceDetail = async (invoiceDetailId) => {
+const deleteInvoiceDetail = async (invoiceDetailId) => {
     const connection = await db.getConnection();
     
     try {
@@ -184,9 +184,9 @@ const DeleteInvoiceDetail = async (invoiceDetailId) => {
 }
 
 module.exports = {
-  CreateInvoiceDetail,
-  GetInvoiceDetailById,
-  GetInvoiceDetailsByInvoiceId,
-  UpdateInvoiceDetail,
-  DeleteInvoiceDetail,
+  createInvoiceDetail,
+  getInvoiceDetailById,
+  getInvoiceDetailsByInvoiceId,
+  updateInvoiceDetail,
+  deleteInvoiceDetail,
 };

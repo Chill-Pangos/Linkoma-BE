@@ -13,7 +13,7 @@ const bcrypt = require("bcryptjs");
  * @throws {ApiError} - If there is an error during the insertion
  */
 
-const CreateUser = async (userData) => {
+const createUser = async (userData) => {
   const connection = await db.getConnection();
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -60,7 +60,7 @@ const CreateUser = async (userData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const GetUserById = async (userId) => {
+const getUserById = async (userId) => {
   const connection = await db.getConnection();
 
   try {
@@ -93,7 +93,7 @@ const GetUserById = async (userId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const GetUsers = async (limit, offset) => {
+const getUsers = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -131,7 +131,7 @@ const GetUsers = async (limit, offset) => {
  * @throws {ApiError} - If there is an error during the update
  */
 
-const UpdateUser = async (userId, userData) => {
+const updateUser = async (userId, userData) => {
   const connection = await db.getConnection();
 
   try {
@@ -183,7 +183,7 @@ const UpdateUser = async (userId, userData) => {
  * @throws {ApiError} - If there is an error during the deletion
  */
 
-const DeleteUser = async (userId) => {
+const deleteUser = async (userId) => {
   const connection = await db.getConnection();
 
   try {
@@ -208,10 +208,43 @@ const DeleteUser = async (userId) => {
   }
 };
 
+/**
+ * @description Get a user by email
+ *
+ * @param {string} email - The email of the user to be retrieved
+ * @return {Object} - The user data
+ * @throws {ApiError} - If there is an error during the retrieval
+ */
+
+const getUserByEmail = async (email) => {
+  const connection = db.getConnection();
+
+  try {
+    if(!email) {
+      throw new ApiError(status.BAD_REQUEST, "Email is required");
+    }
+
+    const [rows] = await connection.execute(
+      "SELECT * FROM user WHERE email = ?",
+      [email]
+    );
+
+    if (rows.length === 0) {
+      throw new ApiError(status.NOT_FOUND, "User not found");
+    }
+
+    return rows[0];
+  } catch (error) {
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+  } finally {
+    connection.release();
+  }
+}
+
 module.exports = {
-  CreateUser,
-  GetUserById,
-  GetUsers,
-  UpdateUser,
-  DeleteUser,
+  createUser,
+  getUserById,
+  getUsers,
+  updateUser,
+  deleteUser,
 };

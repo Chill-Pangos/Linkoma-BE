@@ -9,11 +9,20 @@ const envSchema = Joi.object()
     NODE_ENV: Joi.string()
       .valid("production", "development", "test")
       .required(),
-    PORT: Joi.number().default(3000),
-    HOST: Joi.string().required(),
-    USERNAME: Joi.string().required(),
-    PASSWORD: Joi.string().required(),
-    DATABASE: Joi.string().required(),
+    PORT: Joi.number().default(3000).description("Server port"),
+    HOST: Joi.string().required().description("MySQL host"),
+    USERNAME: Joi.string().required().description("MySQL user name"),
+    PASSWORD: Joi.string().required().description("MySQL user password"),
+    DATABASE: Joi.string().required().description("MySQL database name"),
+    JWT_SECRET: Joi.string().required().description("JWT secret key"),
+    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number()
+      .default(30)
+      .description("minutes after which access token expires"),
+    JWT_REFRESH_EXPIRATION_DAYS: Joi.number()
+      .default(30)
+      .description("days after which refresh token expires"),
+      JWT_RESET_PASSWORD_EXPIRATION_MINUTES: Joi.number()
+      .default(10).description("minutes after which reset password token expires"),
   })
   .unknown();
 
@@ -33,5 +42,11 @@ module.exports = {
       user: envVars.USER,
       password: envVars.PASSWORD,
       database: envVars.DATABASE,
+    },
+    jwt: {
+      secret: envVars.JWT_SECRET,
+      accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
+      refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
+      resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     },
 }
