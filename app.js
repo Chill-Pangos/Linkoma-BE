@@ -4,6 +4,8 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const xss = require("xss-clean");
 const compression = require("compression");
+const passport = require("passport");
+const { jwtStrategy } = require("./config/passport");
 
 require("dotenv").config();
 
@@ -20,7 +22,7 @@ app.use(helmet());
 app.use(express.json());
 
 //parse urlencoded request body
-app.use(express.urlencoded({ extended: true}))
+app.use(express.urlencoded({ extended: true }));
 
 //set HTTP requests logger
 app.use(morgan("dev"));
@@ -28,8 +30,11 @@ app.use(morgan("dev"));
 //compress response bodies
 app.use(compression());
 
+// initialize passport for authentication
+app.use(passport.initialize());
+passport.use("jwt", jwtStrategy);
+
 //set xss clean
 //app.use(xss());
-
 
 module.exports = app;
