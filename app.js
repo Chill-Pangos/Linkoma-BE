@@ -6,6 +6,7 @@ const xss = require("xss-clean");
 const compression = require("compression");
 const passport = require("passport");
 const { jwtStrategy } = require("./config/passport");
+const cookieParser = require("cookie-parser");
 
 require("dotenv").config();
 
@@ -35,6 +36,9 @@ app.use(passport.initialize());
 passport.use("jwt", jwtStrategy);
 
 //set xss clean
-//app.use(xss());
+app.use(xss());
+
+// parse cookies
+app.use(cookieParser());
 
 module.exports = app;

@@ -86,13 +86,13 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
  */
 
 const verifyToken = async (token, type, secret = config.jwt.secret) => {
-    let payload;
+  let payload;
 
-    try {
-      payload = jwt.verify(token, secret);
-    } catch (error) {
-      throw new ApiError(status.UNAUTHORIZED, "Invalid or expired token");
-    }
+  try {
+    payload = jwt.verify(token, secret);
+  } catch (error) {
+    throw new ApiError(status.UNAUTHORIZED, "Invalid or expired token");
+  }
 
   if (payload.type !== type) {
     throw new ApiError(status.UNAUTHORIZED, "Invalid token type");
@@ -292,6 +292,24 @@ const resetPasswordToken = async (userId) => {
   };
 };
 
+/**
+ * @description Generates an access token for a user
+ * @param {number} userId - The ID of the user
+ * @return {Promise<Object>} - An object containing the access token and its expiration date
+ * @throws {ApiError} - If there is an error during token generation
+ */
+
+const generateAccessToken = async (userId) => {
+  const expires = day().add(config.jwt.accessExpirationMinutes, "minute");
+
+  const accessToken = await generateToken(userId, tokenTypes.ACCESS, expires);
+
+  return {
+    accessToken: accessToken,
+    expires: expires.toDate(),
+  };
+};
+
 module.exports = {
   generateToken,
   saveToken,
@@ -301,4 +319,5 @@ module.exports = {
   refreshAuthToken,
   revokeToken,
   revokeAllTokens,
+  generateAccessToken,
 };

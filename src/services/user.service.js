@@ -247,4 +247,5 @@ module.exports = {
   getUsers,
   updateUser,
   deleteUser,
+  getUserByEmail
 };

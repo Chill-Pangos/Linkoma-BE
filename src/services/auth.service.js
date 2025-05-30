@@ -145,28 +145,17 @@ const refreshAuth = async (refreshToken) => {
 };
 
 /**
- * @description Resets the user's password
- *
- * @param {string} email - The user's email
- * @param {string} newPassword - The new password to set
- * @return {Object} - A message indicating the password reset was successful
- * @throws {ApiError} - If there is an error during the password reset process
+ * @description Initiates the forgot password process by generating a reset token
+ * 
+ * @param {string} email - The email of the user requesting a password reset
+ * @return {Object} - An object containing the reset password token and its expiration date
+ * @throws {ApiError} - If the email is not provided or the user is not found
  */
 
-/**
- *  * @description Generates a reset password token for a user
- * @param {string} email - The email of the user
- * @returns {Promise<Object>} - An object containing the reset password token and its expiration date
- * @throws {ApiError} - If there is an error during token generation
- */
-
-const resetPassword = async (email) => {
+const forgotPassword = async (email) => {
   try {
     if (!email) {
-      throw new ApiError(
-        status.BAD_REQUEST,
-        "Email and new password are required"
-      );
+      throw new ApiError(status.BAD_REQUEST, "Email is required");
     }
 
     const user = await userService.getUserByEmail(email);
@@ -179,6 +168,46 @@ const resetPassword = async (email) => {
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
+}
+
+/**
+ * @description Resets the user's password using a valid reset token
+ *
+ * @param {string} resetToken - The reset token provided to the user
+ * @param {string} password - The new password to be set
+ * @return {Object} - A success message if the password is reset successfully
+ * @throws {ApiError} - If the reset token is invalid or the user is not found
+ */
+
+const resetPassword = async (resetToken, password) => {
+  try {
+    if (!resetToken || !password) {
+      throw new ApiError(status.BAD_REQUEST, "Reset token and password are required");
+    }
+
+    const tokenData = await tokenService.verifyToken(
+      resetToken,
+      tokenTypes.RESET_PASSWORD
+    );
+
+    if (!tokenData) {
+      throw new ApiError(status.UNAUTHORIZED, "Invalid reset token");
+    }
+
+    const user = await userService.getUserById(tokenData.userID);
+
+    if (!user) {
+      throw new ApiError(status.NOT_FOUND, "User not found");
+    }
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await userService.updateUserPassword(user.userID, hashedPassword);
+
+    return { message: "Password reset successfully" };
+  } catch (error) {
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
 };
 
 module.exports = {
@@ -186,5 +215,6 @@ module.exports = {
   logout,
   refreshAccessToken,
   refreshAuth,
+  forgotPassword,
   resetPassword,
 };
