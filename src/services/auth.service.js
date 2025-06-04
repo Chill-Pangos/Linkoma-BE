@@ -29,11 +29,11 @@ const login = async (email, password) => {
       throw new ApiError(status.UNAUTHORIZED, "Invalid email");
     }
 
-    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    // if (!isPasswordValid) {
-    //   throw new ApiError(status.UNAUTHORIZED, "Invalid password");
-    // }
+    if (!isPasswordValid) {
+      throw new ApiError(status.UNAUTHORIZED, "Invalid password");
+    }
 
     return {
       user: user,
@@ -61,7 +61,6 @@ const logout = async (refreshToken) => {
 
     await tokenService.revokeToken(
       refreshToken,
-      tokenTypes.REFRESH,
       tokenData.userID
     );
 

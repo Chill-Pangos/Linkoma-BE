@@ -87,16 +87,6 @@ router.post(
  *     summary: Logout user
  *     description: Logout user by invalidating the refresh token
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 example: refresh_token_string
  *     responses:
  *       '200':
  *         description: User logged out successfully

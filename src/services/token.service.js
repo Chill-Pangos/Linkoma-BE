@@ -103,10 +103,10 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
     try {
       const query = `
             SELECT * FROM tokens 
-            WHERE token = ? AND userID = ? AND type = ? AND revoked = false AND expires > NOW()
+            WHERE token = ? AND userID = ? AND revoked = false AND expires > NOW()
         `;
 
-      const values = [token, payload.sub, type];
+      const values = [token, payload.sub];
 
       const [rows] = await connection.execute(query, values);
 
@@ -186,17 +186,17 @@ const generateAuthTokens = async (userId) => {
  * @throws {ApiError} - If there is an error during token revocation
  */
 
-const revokeToken = async (token, type, userId) => {
+const revokeToken = async (token, userId) => {
   const connection = await db.getConnection();
 
   try {
     const query = `
             UPDATE tokens 
             SET revoked = true 
-            WHERE token = ? AND type = ? AND userID = ?
+            WHERE token = ? AND userID = ?
         `;
 
-    const values = [token, type, userId];
+    const values = [token, userId];
 
     const [result] = await connection.execute(query, values);
 

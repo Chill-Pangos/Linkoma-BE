@@ -26,6 +26,9 @@ const login = catchAsync(async (req, res) => {
 const logout = catchAsync(async (req, res) => {
   const { refreshToken } = req.cookies;
 
+  console.log(refreshToken);
+  
+
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
