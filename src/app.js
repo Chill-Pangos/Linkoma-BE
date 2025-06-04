@@ -9,6 +9,7 @@ const { jwtStrategy } = require("./config/passport");
 const cookieParser = require("cookie-parser");
 const routes = require("./routes/v1");
 const config = require("./config/config");
+const rateLimit = require("express-rate-limit");
 
 require("dotenv").config();
 
@@ -28,6 +29,15 @@ app.options(
     exposedHeaders: ['Authorization'],
   })
 );
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
+  standardHeaders: true, 
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 // Security headers 
 app.use(helmet());
