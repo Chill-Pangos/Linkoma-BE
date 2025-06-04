@@ -3,7 +3,7 @@ const day = require("dayjs");
 const { tokenTypes } = require("../config/tokens");
 const config = require("../config/config");
 const db = require("../config/database");
-const ApiError = require("../errors/api.error");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const { ref } = require("joi");
 
@@ -49,11 +49,11 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
 
   try {
     const query = `
-      INSERT INTO tokens (token, userID, type, expires, revoked)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO tokens (token, userID, expires, revoked)
+      VALUES (?, ?, ?, ?)
     `;
 
-    const values = [token, userId, type, expires, revoked];
+    const values = [token, userId, expires, revoked];
 
     const [result] = await connection.execute(query, values);
 
@@ -140,11 +140,11 @@ const generateAuthTokens = async (userId) => {
   const accessTokenExpires = day().add(
     config.jwt.accessExpirationMinutes,
     "minute"
-  );
+  ).toDate();
   const refreshTokenExpires = day().add(
     config.jwt.refreshExpirationDays,
     "day"
-  );
+  ).toDate();
 
   const accessToken = await generateToken(
     userId,
@@ -168,11 +168,11 @@ const generateAuthTokens = async (userId) => {
   return {
     access: {
       token: accessToken,
-      expires: accessTokenExpires.toDate(),
+      expires: accessTokenExpires,
     },
     refresh: {
       token: refreshToken,
-      expires: refreshTokenExpires.toDate(),
+      expires: refreshTokenExpires,
     },
   };
 };

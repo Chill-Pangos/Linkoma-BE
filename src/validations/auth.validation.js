@@ -24,24 +24,6 @@ const logout = {
     }).unknown(true)    
 }
 
-const refreshAccessToken = {
-    cookies: Joi.object({
-        refreshToken: Joi.string().required().messages({
-            "string.empty": "Refresh token cannot be empty",
-            "any.required": "Refresh token is required",
-        })
-    }).unknown(true)  
-}
-
-const refreshAuth = {
-    cookies: Joi.object({
-        refreshToken: Joi.string().required().messages({
-            "string.empty": "Refresh token cannot be empty",
-            "any.required": "Refresh token is required",
-        })
-    }).unknown(true)
-}
-
 const forgotPassword = {
     body: Joi.object({
         email: Joi.string().email().required().messages({
@@ -70,7 +52,6 @@ const resetPassword = {
 module.exports = {
     login,
     logout,
-    refreshAccessToken,
-    refreshAuth,
+    forgotPassword,
     resetPassword
 };

@@ -1,6 +1,6 @@
 const db = require("../config/database");
 const userFieldConfig = require("../config/fieldConfig/user.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 const bcrypt = require("bcryptjs");
@@ -217,7 +217,7 @@ const deleteUser = async (userId) => {
  */
 
 const getUserByEmail = async (email) => {
-  const connection = db.getConnection();
+  const connection = await db.getConnection();
 
   try {
     if(!email) {
@@ -237,7 +237,7 @@ const getUserByEmail = async (email) => {
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
   } finally {
-    connection.release();
+    await connection.release();
   }
 }
 

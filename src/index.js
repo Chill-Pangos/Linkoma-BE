@@ -1,7 +1,7 @@
 const app = require("./app");
-const config = require("./src/config/config");
-const db = require("./src/config/database");
-const { CreateUser, GetUserById } = require("./src/services/user.service");
+const config = require("./config/config");
+const db = require("./config/database");
+const { CreateUser, GetUserById } = require("./services/user.service");
 
 async function checkConnection() {
   let connection;
@@ -23,11 +23,6 @@ checkConnection().then(() => {
   app.listen(config.port, () => {
     console.log(`Server is running on port ${config.port}`);
   });
-
-  // app.get("/", (req, res) => {
-  //   const result = GetUserById(1);
-  //   res.status(200).send(result);
-  // });
 })
 
 

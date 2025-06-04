@@ -1,0 +1,481 @@
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken  
+
+  schemas:
+    User:
+      type: object
+      properties:
+        userID:
+          type: integer
+          format: int32
+          readOnly: true
+          description: "Primary key, auto-increment"
+          example: 1
+        name:
+          type: string
+          maxLength: 100
+          example: "Nguyễn Văn A"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1990-05-21"
+        phoneNumber:
+          type: string
+          maxLength: 20
+          example: "0901234567"
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: "example@example.com"
+        citizenID:
+          type: string
+          maxLength: 20
+          example: "012345678901"
+        address:
+          type: string
+          example: "123 Nguyễn Văn Cừ, Phường 2, Quận 5, TP. Hồ Chí Minh"
+        licensePlate:
+          type: string
+          maxLength: 20
+          example: "51A-12345"
+        apartmentID:
+          type: integer
+          format: int32
+          example: 101
+        password:
+          type: string
+          maxLength: 255
+          format: password
+          example: "hashed_password_string"
+        role:
+          type: string
+          enum:
+            - admin
+            - employee
+            - resident
+          example: "resident"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2024-06-03T12:34:56Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2024-06-03T13:00:00Z"
+      required:
+        - email
+        - password
+        - role
+
+    Announcement:
+      type: object
+      properties:
+        announcementID:
+          type: integer
+          format: int32
+          readOnly: true
+          description: "Primary key, auto-increment"
+          example: 1
+        type: 
+          type: string 
+          maxLength: 50
+        priority:
+          type: string
+          maxLength: 20
+        title: 
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        author: 
+          type: integer
+          format: int32
+          example: 101
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2024-06-03T12:34:56Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2024-06-03T13:00:00Z"
+        
+    Apartment:
+      type: object
+      properties:
+        apartmentID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 101
+        apartmentTypeID:
+          type: integer
+          format: int32
+          example: 1
+        floor:
+          type: integer
+          format: int32
+          example: 3
+        status:
+          type: string
+          enum:
+            - Available
+            - Rented
+          example: "Available"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-03T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-03T10:30:00Z"
+      required:
+        - apartmentTypeID
+        - floor
+        - status
+
+    ApartmentType:
+      type: object
+      properties:
+        apartmentTypeID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        typeName:
+          type: string
+          maxLength: 100
+          example: "2-Bedroom Standard"
+        area:
+          type: number
+          format: float
+          example: 65.5
+        numBedrooms:
+          type: integer
+          example: 2
+        numBathrooms:
+          type: integer
+          example: 1
+        rentFee:
+          type: number
+          format: double
+          example: 750.00
+        description:
+          type: string
+          example: "Spacious 2-bedroom apartment with balcony and city view."
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-03T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-03T10:45:00Z"
+      required:
+        - typeName
+
+    Contract:
+      type: object
+      properties:
+        contractID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        apartmentID:
+          type: integer
+          format: int32
+          example: 101
+        startDate:
+          type: string
+          format: date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          example: "2026-05-31"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+
+    Feedback:
+      type: object
+      properties:
+        feedbackID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        userID:
+          type: integer
+          format: int32
+          example: 101
+        category:
+          type: string
+          enum: [Maintenance, Service, Complaint]
+          example: "Maintenance"
+        description:
+          type: string
+          example: "Air conditioner in bedroom not working."
+        status:
+          type: string
+          enum: [Pending, In Progress, Resolved, Rejected]
+          example: "Pending"
+        response:
+          type: string
+          example: "Technician will visit tomorrow at 9 AM."
+        responseDate:
+          type: string
+          format: date
+          example: "2025-06-03"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-02T10:00:00Z"
+      required:
+        - userID
+        - category
+
+    Invoice:
+      type: object
+      properties:
+        invoiceID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        apartmentID:
+          type: integer
+          format: int32
+          example: 101
+        rentFee:
+          type: number
+          format: double
+          example: 750.00
+        serviceFee:
+          type: number
+          format: double
+          example: 50.00
+        dueDate:
+          type: string
+          format: date
+          example: "2025-06-15"
+        status:
+          type: string
+          enum: [Unpaid, Paid, Overdue]
+          example: "Unpaid"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T10:00:00Z"
+      required:
+        - apartmentID
+        - rentFee
+        - serviceFee
+        - dueDate
+        - status
+
+    InvoiceDetail:
+      type: object
+      properties:
+        invoiceDetailID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        invoiceID:
+          type: integer
+          format: int32
+          example: 101
+        serviceTypeID:
+          type: integer
+          format: int32
+          example: 5
+        usage:
+          type: number
+          format: float
+          example: 120.5
+        totalAmount:
+          type: number
+          format: double
+          example: 300.75
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T12:00:00Z"
+      required:
+        - invoiceID
+        - serviceTypeID
+        - usage
+        - totalAmount
+
+    ServiceRegistration:
+      type: object
+      properties:
+        serviceRegistrationID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        apartmentID:
+          type: integer
+          format: int32
+          example: 101
+        serviceTypeID:
+          type: integer
+          format: int32
+          example: 5
+        startDate:
+          type: string
+          format: date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          example: "2026-06-01"
+        status:
+          type: string
+          enum: [Active, Inactive, Cancelled]
+          example: "Active"
+        note:
+          type: string
+          example: "Service temporarily paused due to renovation."
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-10T15:00:00Z"
+      required:
+        - apartmentID
+        - serviceTypeID
+        - startDate
+        - endDate
+
+    ServiceType:
+      type: object
+      properties:
+        serviceTypeID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        serviceName:
+          type: string
+          maxLength: 100
+          example: "Water Supply"
+        unit:
+          type: string
+          maxLength: 20
+          example: "m3"
+        unitPrice:
+          type: number
+          format: double
+          example: 15.50
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T12:00:00Z"
+      required:
+        - serviceName
+        - unit
+        - unitPrice
+
+    Permission:
+      type: object
+      properties:
+        permissionID:
+          type: integer
+          format: int32
+          readOnly: true
+          example: 1
+        role:
+          type: string
+          enum:
+            - admin
+            - employee
+            - resident
+          example: admin
+        permissionKey:
+          type: string
+          maxLength: 100
+          example: "VIEW_INVOICES"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2025-06-01T12:00:00Z"
+      required:
+        - role
+        - permissionKey
+
+    Token:
+      type: object
+      properties:
+        accessToken:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer

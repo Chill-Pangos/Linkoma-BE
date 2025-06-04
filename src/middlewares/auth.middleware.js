@@ -1,5 +1,5 @@
 const tokenService = require("../services/token.service");
-const { tokenTypes } = require("../config/tokens.config");
+const { tokenTypes } = require("../config/tokens");
 const ApiError = require("../utils/ApiError");
 const { status } = require("http-status");
 const catchAsync = require("../utils/catchAsync");
@@ -57,7 +57,7 @@ const auth = (...requiredPermissions) =>
         if (!user) throw new ApiError(status.UNAUTHORIZED, "User not found");
 
         const newAccessToken = await tokenService.generateAccessToken(user.id);
-        res.setHeader("Authorization", `Bearer ${newAccessToken}`);
+        res.setHeader("Authorization", `Bearer ${newAccessToken.accessToken}`);
 
         req.user = user;
         await checkPermissions(user.role, requiredPermissions);
