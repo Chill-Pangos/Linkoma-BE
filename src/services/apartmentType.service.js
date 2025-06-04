@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  * @throws {ApiError} - If there is an error during the insertion
  */
 
-const CreateApartmentType = async (apartmentTypeData) => {
+const createApartmentType = async (apartmentTypeData) => {
   const connection = await db.getConnection();
 
   try {
@@ -61,7 +61,7 @@ const CreateApartmentType = async (apartmentTypeData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const GetApartmentTypeById = async (apartmentTypeId) => {
+const getApartmentTypeById = async (apartmentTypeId) => {
   const connection = await db.getConnection();
 
   try {
@@ -95,7 +95,7 @@ const GetApartmentTypeById = async (apartmentTypeId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const GetApartmentTypes = async (limit, offset) => {
+const getApartmentTypes = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -133,7 +133,7 @@ const GetApartmentTypes = async (limit, offset) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const UpdateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
+const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
   const connection = await db.getConnection();
 
   try {
@@ -189,7 +189,7 @@ const UpdateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  */
 
-const DeleteApartmentType = async (apartmentTypeId) => {
+const deleteApartmentType = async (apartmentTypeId) => {
     const connection = await db.getConnection();
     
     try {
@@ -215,9 +215,9 @@ const DeleteApartmentType = async (apartmentTypeId) => {
     }
 
 module.exports = {
-  CreateApartmentType,
-  GetApartmentTypeById,
-  GetApartmentTypes,
-  UpdateApartmentType,
-  DeleteApartmentType
+  createApartmentType,
+  getApartmentTypeById,
+  getApartmentTypes,
+  updateApartmentType,
+  deleteApartmentType,
 };

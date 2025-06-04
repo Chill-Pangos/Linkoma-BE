@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  * @throws {ApiError} - If there is an error during the insertion
  * */
 
-const CreateServiceRegistration = async (serviceRegistrationData) => {
+const createServiceRegistration = async (serviceRegistrationData) => {
   const connection = await db.getConnection();
 
   try {
@@ -60,7 +60,7 @@ const CreateServiceRegistration = async (serviceRegistrationData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetServiceRegistrationById = async (serviceRegistrationId) => {
+const getServiceRegistrationById = async (serviceRegistrationId) => {
   const connection = await db.getConnection();
 
   try {
@@ -93,7 +93,7 @@ const GetServiceRegistrationById = async (serviceRegistrationId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetServiceRegistrationByApartmentId = async (apartmentId) => {
+const getServiceRegistrationByApartmentId = async (apartmentId) => {
   const connection = await db.getConnection();
 
   try {
@@ -124,7 +124,7 @@ const GetServiceRegistrationByApartmentId = async (apartmentId) => {
  * @throws {ApiError} - If there is an error during the update
  * */
 
-const UpdateServiceRegistration = async (
+const updateServiceRegistration = async (
   serviceRegistrationId,
   serviceRegistrationData
 ) => {
@@ -185,38 +185,38 @@ const UpdateServiceRegistration = async (
  * @throws {ApiError} - If there is an error during the deletion
  * */
 
-const DeleteServiceRegistration = async (serviceRegistrationId) => {
-    const connection = await db.getConnection();
-    
-    try {
-        if (!serviceRegistrationId) {
-        throw new ApiError(
-            status.BAD_REQUEST,
-            "Service registration ID is required"
-        );
-        }
-    
-        const query = `DELETE FROM serviceregistration WHERE serviceRegistrationID = ?`;
-        const [result] = await connection.execute(query, [serviceRegistrationId]);
-    
-        if (result.affectedRows === 0) {
-        throw new ApiError(status.NOT_FOUND, "Service registration not found");
-        }
-    
-        return {
-        message: "Service registration deleted successfully",
-        };
-    } catch (error) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-        connection.release();
+const deleteServiceRegistration = async (serviceRegistrationId) => {
+  const connection = await db.getConnection();
+
+  try {
+    if (!serviceRegistrationId) {
+      throw new ApiError(
+        status.BAD_REQUEST,
+        "Service registration ID is required"
+      );
     }
-}
+
+    const query = `DELETE FROM serviceregistration WHERE serviceRegistrationID = ?`;
+    const [result] = await connection.execute(query, [serviceRegistrationId]);
+
+    if (result.affectedRows === 0) {
+      throw new ApiError(status.NOT_FOUND, "Service registration not found");
+    }
+
+    return {
+      message: "Service registration deleted successfully",
+    };
+  } catch (error) {
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+  } finally {
+    connection.release();
+  }
+};
 
 module.exports = {
-  CreateServiceRegistration,
-  GetServiceRegistrationById,
-  GetServiceRegistrationByApartmentId,
-  UpdateServiceRegistration,
-  DeleteServiceRegistration,
+  createServiceRegistration,
+  getServiceRegistrationById,
+  getServiceRegistrationByApartmentId,
+  updateServiceRegistration,
+  deleteServiceRegistration,
 };

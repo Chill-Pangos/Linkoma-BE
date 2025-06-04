@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  */
 
-const CreateApartment = async (apartmentData) => {
+const createApartment = async (apartmentData) => {
   const connection = await db.getConnection();
 
   try {
@@ -61,7 +61,7 @@ const CreateApartment = async (apartmentData) => {
  *
  */
 
-const GetApartmentById = async (apartmentId) => {
+const getApartmentById = async (apartmentId) => {
   const connection = await db.getConnection();
 
   try {
@@ -89,7 +89,7 @@ const GetApartmentById = async (apartmentId) => {
  *
  */
 
-const GetApartments = async (limit, offset) => {
+const getApartments = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -127,7 +127,7 @@ const GetApartments = async (limit, offset) => {
  *
  */
 
-const UpdateApartment = async (apartmentId, apartmentData) => {
+const updateApartment = async (apartmentId, apartmentData) => {
   const connection = await db.getConnection();
 
   try {
@@ -179,7 +179,7 @@ const UpdateApartment = async (apartmentId, apartmentData) => {
  *
  */
 
-const DeleteApartment = async (apartmentId) => {
+const deleteApartment = async (apartmentId) => {
   const connection = await db.getConnection();
 
   try {
@@ -206,9 +206,9 @@ const DeleteApartment = async (apartmentId) => {
 };
 
 module.exports = {
-  CreateApartment,
-  GetApartmentById,
-  GetApartments,
-  UpdateApartment,
-  DeleteApartment,
+  createApartment,
+  getApartmentById,
+  getApartments,
+  updateApartment,
+  deleteApartment,
 };

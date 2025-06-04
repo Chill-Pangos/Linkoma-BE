@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  * @throws {ApiError} - If there is an error during the insertion
  * */
 
-const CreateServiceType = async (serviceTypeData) => {
+const createServiceType = async (serviceTypeData) => {
   const connection = await db.getConnection();
 
   try {
@@ -60,7 +60,7 @@ const CreateServiceType = async (serviceTypeData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetServiceTypeById = async (serviceTypeId) => {
+const getServiceTypeById = async (serviceTypeId) => {
   const connection = await db.getConnection();
 
   try {
@@ -92,7 +92,7 @@ const GetServiceTypeById = async (serviceTypeId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetServiceTypes = async (limit, offset) => {
+const getServiceTypes = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -118,47 +118,47 @@ const GetServiceTypes = async (limit, offset) => {
  * @throws {ApiError} - If there is an error during the deletion
  * */
 
-const UpdateServiceType = async (serviceTypeId, serviceTypeData) => {
-    const connection = await db.getConnection();
-    
-    try {
-        if (!serviceTypeId) {
-        throw new ApiError(status.BAD_REQUEST, "Service type ID is required");
-        }
-    
-        const fields = filterValidFields.filterValidFieldsFromObject(
-        serviceTypeData,
-        serviceTypeFieldConfig.updatableFields
-        );
-    
-        const entries = Object.entries(fields);
-    
-        if (entries.length === 0) {
-        throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
-        }
-    
-        const query = `UPDATE servicetype SET ${entries
-        .map(([key]) => `${key} = ?`)
-        .join(", ")} WHERE serviceTypeID = ?`;
-    
-        const values = [...entries.map(([_, value]) => value), serviceTypeId];
-    
-        const [result] = await connection.execute(query, values);
-    
-        if (result.affectedRows === 0) {
-        throw new ApiError(status.NOT_FOUND, "Service type not found");
-        }
-    
-        return {
-        message: "Service type updated successfully",
-        serviceTypeId,
-        };
-    } catch (error) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-        connection.release();
+const updateServiceType = async (serviceTypeId, serviceTypeData) => {
+  const connection = await db.getConnection();
+
+  try {
+    if (!serviceTypeId) {
+      throw new ApiError(status.BAD_REQUEST, "Service type ID is required");
     }
-}
+
+    const fields = filterValidFields.filterValidFieldsFromObject(
+      serviceTypeData,
+      serviceTypeFieldConfig.updatableFields
+    );
+
+    const entries = Object.entries(fields);
+
+    if (entries.length === 0) {
+      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+    }
+
+    const query = `UPDATE servicetype SET ${entries
+      .map(([key]) => `${key} = ?`)
+      .join(", ")} WHERE serviceTypeID = ?`;
+
+    const values = [...entries.map(([_, value]) => value), serviceTypeId];
+
+    const [result] = await connection.execute(query, values);
+
+    if (result.affectedRows === 0) {
+      throw new ApiError(status.NOT_FOUND, "Service type not found");
+    }
+
+    return {
+      message: "Service type updated successfully",
+      serviceTypeId,
+    };
+  } catch (error) {
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+  } finally {
+    connection.release();
+  }
+};
 
 /**
  * @description Delete a service type by ID
@@ -167,7 +167,7 @@ const UpdateServiceType = async (serviceTypeId, serviceTypeData) => {
  * @throws {ApiError} - If there is an error during the deletion
  * */
 
-const DeleteServiceType = async (serviceTypeId) => {
+const deleteServiceType = async (serviceTypeId) => {
   const connection = await db.getConnection();
 
   try {
@@ -191,12 +191,12 @@ const DeleteServiceType = async (serviceTypeId) => {
   } finally {
     connection.release();
   }
-}
+};
 
 module.exports = {
-  CreateServiceType,
-  GetServiceTypeById,
-  GetServiceTypes,
-  UpdateServiceType,
-  DeleteServiceType,
+  createServiceType,
+  getServiceTypeById,
+  getServiceTypes,
+  updateServiceType,
+  deleteServiceType,
 };

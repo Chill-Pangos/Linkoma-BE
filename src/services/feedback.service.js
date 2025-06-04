@@ -12,7 +12,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *  * @throws {ApiError} - If there is an error during the insertion
  *  * */
 
-const CreateFeedback = async (feedbackData) => {
+const createFeedback = async (feedbackData) => {
   const connection = await db.getConnection();
 
   try {
@@ -60,7 +60,7 @@ const CreateFeedback = async (feedbackData) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetFeedbackById = async (feedbackId) => {
+const getFeedbackById = async (feedbackId) => {
   const connection = await db.getConnection();
 
   try {
@@ -91,7 +91,7 @@ const GetFeedbackById = async (feedbackId) => {
  * @throws {ApiError} - If there is an error during the retrieval
  * */
 
-const GetFeedbacks = async (limit, offset) => {
+const getFeedbacks = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -119,7 +119,7 @@ const GetFeedbacks = async (limit, offset) => {
  * @throws {ApiError} - If there is an error during the update
  * */
 
-const UpdateFeedback = async (feedbackId, feedbackData) => {
+const updateFeedback = async (feedbackId, feedbackData) => {
   const connection = await db.getConnection();
 
   try {
@@ -171,7 +171,7 @@ const UpdateFeedback = async (feedbackId, feedbackData) => {
  * @throws {ApiError} - If there is an error during the deletion
  * */
 
-const DeleteFeedback = async (feedbackId) => {
+const deleteFeedback = async (feedbackId) => {
   const connection = await db.getConnection();
 
   try {
@@ -198,9 +198,9 @@ const DeleteFeedback = async (feedbackId) => {
 };
 
 module.exports = {
-  CreateFeedback,
-  GetFeedbackById,
-  GetFeedbacks,
-  UpdateFeedback,
-  DeleteFeedback,
+  createFeedback,
+  getFeedbackById,
+  getFeedbacks,
+  updateFeedback,
+  deleteFeedback,
 };

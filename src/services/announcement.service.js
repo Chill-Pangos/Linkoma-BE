@@ -13,7 +13,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * */
 
-const CreateAnnouncement = async (announcementData) => {
+const createAnnouncement = async (announcementData) => {
   const connection = await db.getConnection();
 
   try {
@@ -63,7 +63,7 @@ const CreateAnnouncement = async (announcementData) => {
  *
  * */
 
-const GetAnnouncementById = async (announcementId) => {
+const getAnnouncementById = async (announcementId) => {
   const connection = await db.getConnection();
 
   try {
@@ -96,7 +96,7 @@ const GetAnnouncementById = async (announcementId) => {
  *
  */
 
-const GetAnnouncements = async (limit, offset) => {
+const getAnnouncements = async (limit, offset) => {
   const connection = await db.getConnection();
 
   try {
@@ -129,7 +129,7 @@ const GetAnnouncements = async (limit, offset) => {
  *
  */
 
-const UpdateAnnouncement = async (announcementId, announcementData) => {
+const updateAnnouncement = async (announcementId, announcementData) => {
   const connection = await db.getConnection();
 
   try {
@@ -183,7 +183,7 @@ const UpdateAnnouncement = async (announcementId, announcementData) => {
  *
  */
 
-const DeleteAnnouncement = async (announcementId) => {
+const deleteAnnouncement = async (announcementId) => {
   const connection = await db.getConnection();
 
   try {
@@ -209,9 +209,9 @@ const DeleteAnnouncement = async (announcementId) => {
 };
 
 module.exports = {
-  CreateAnnouncement,
-  GetAnnouncementById,
-  GetAnnouncements,
-  UpdateAnnouncement,
-  DeleteAnnouncement
+  createAnnouncement,
+  getAnnouncementById,
+  getAnnouncements,
+  updateAnnouncement,
+  deleteAnnouncement,
 };
