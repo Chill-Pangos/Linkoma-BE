@@ -1,21 +1,31 @@
 const authController = require("../../controllers/auth.controller");
 const express = require("express");
-const passport = require("passport");
 const validate = require("../../middlewares/validate.middleware");
 const authValidation = require("../../validations/auth.validation");
-const auth = require("../../middlewares/auth.middleware");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 
-router.post("/login", validate(authValidation.login), authController.login);
-router.post("/logout", validate(authValidation.logout), authController.logout);
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: {
+    statusCode: 429,
+    message: "Too many requests, please try again later.",
+  },
+});
+
+router.post("/login", authLimiter, validate(authValidation.login), authController.login);
+router.post("/logout", authLimiter, validate(authValidation.logout), authController.logout);
 router.post(
   "/forgot-password",
+  authLimiter,
   validate(authValidation.forgotPassword),
   authController.forgotPassword
 );
 router.post(
   "/reset-password/:resetToken",
+  authLimiter,
   validate(authValidation.resetPassword),
   authController.resetPassword
 );
