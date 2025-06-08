@@ -10,7 +10,7 @@ const envSchema = Joi.object()
       .valid("production", "development", "test")
       .required(),
     PORT: Joi.number().default(3000).description("Server port"),
-    HOST: Joi.string().required().description("MySQL host"),
+    HOST: Joi.string().required().description("Server host"),
     DB_CA: Joi.string()
       .description("MySQL CA certificate path, if using SSL"),
     DB_HOST: Joi.string()
@@ -53,6 +53,7 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  host: envVars.HOST,
   mysql: {
     host: envVars.DB_HOST,
     port: envVars.DB_PORT,

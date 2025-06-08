@@ -1,4 +1,5 @@
 const { version } = require("../../package.json");
+const config = require("../config/config");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -13,7 +14,7 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: "http://localhost:3000/v1",
+      url: config.host + "/v1",
     },
   ],
 };
