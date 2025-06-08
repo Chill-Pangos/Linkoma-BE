@@ -1,5 +1,8 @@
 name: GitGuardian Scan
 
+permissions:
+  contents: read
+
 on:
   push:
   pull_request:
