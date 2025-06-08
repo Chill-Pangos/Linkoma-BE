@@ -1,5 +1,5 @@
 module.exports = {
   insertableFields: ["serviceName", "unit", "unitPrice"],
   updatableFields: ["serviceName", "unit", "unitPrice"],
-  searchableFields: ["serviceTypeID", "serviceName"],
+  searchableFields: ["serviceTypeId", "serviceName", "unit", "unitPrice", "createdAt", "updatedAt"],
 };

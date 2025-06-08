@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const Apartment = require("../models/apartment.model");
 const apartmentFieldConfig = require("../config/fieldConfig/apartment.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  */
 
 const createApartment = async (apartmentData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       apartmentData,
@@ -27,15 +25,9 @@ const createApartment = async (apartmentData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO apartment (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const apartment = await Apartment.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!apartment) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment creation failed"
@@ -44,12 +36,10 @@ const createApartment = async (apartmentData) => {
 
     return {
       message: "Apartment created successfully",
-      apartmentId: result.insertId,
+      apartmentId: apartment.apartmentId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -62,21 +52,20 @@ const createApartment = async (apartmentData) => {
  */
 
 const getApartmentById = async (apartmentId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `SELECT * FROM apartment WHERE apartmentID = ?`;
-    const [rows] = await connection.execute(query, [apartmentId]);
+    if (!apartmentId) {
+      throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
+    }
 
-    if (rows.length === 0) {
+    const apartment = await Apartment.findByPk(apartmentId);
+
+    if (!apartment) {
       throw new ApiError(status.NOT_FOUND, "Apartment not found");
     }
 
-    return rows[0];
+    return apartment;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -90,31 +79,24 @@ const getApartmentById = async (apartmentId) => {
  */
 
 const getApartments = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const [rows] = await connection.execute(
-      "SELECT * FROM apartment ORDER BY apartmentID LIMIT ? OFFSET ?",
-      [limit, offset]
-    );
+    const { count, rows } = await Apartment.findAndCountAll({
+      order: [["apartmentId", "ASC"]],
+      limit: limit,
+      offset: offset,
+    });
 
     if (rows.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No apartments found");
     }
 
-    const [[{ totalCount }]] = await connection.execute(
-      "SELECT COUNT(*) AS totalCount FROM apartment"
-    );
-
     return {
       data: rows,
-      totalPages: Math.ceil(totalCount / limit),
+      totalPages: Math.ceil(count / limit),
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -128,8 +110,6 @@ const getApartments = async (limit, offset) => {
  */
 
 const updateApartment = async (apartmentId, apartmentData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!apartmentId) {
       throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
@@ -145,15 +125,11 @@ const updateApartment = async (apartmentId, apartmentData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE apartment SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE apartmentID = ?`;
+    const [affectedRows] = await Apartment.update(fields, {
+      where: { apartmentId: apartmentId },
+    });
 
-    const values = [...entries.map(([_, value]) => value), apartmentId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment update failed"
@@ -166,8 +142,6 @@ const updateApartment = async (apartmentId, apartmentData) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -180,17 +154,16 @@ const updateApartment = async (apartmentId, apartmentData) => {
  */
 
 const deleteApartment = async (apartmentId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!apartmentId) {
       throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
     }
 
-    const query = `DELETE FROM apartment WHERE apartmentID = ?`;
-    const [result] = await connection.execute(query, [apartmentId]);
+    const deletedRows = await Apartment.destroy({
+      where: { apartmentId: apartmentId },
+    });
 
-    if (result.affectedRows === 0) {
+    if (deletedRows === 0) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment deletion failed"
@@ -200,8 +173,6 @@ const deleteApartment = async (apartmentId) => {
     return { message: "Apartment deleted successfully" };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

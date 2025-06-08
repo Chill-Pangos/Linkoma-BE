@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const InvoiceDetail = require("../models/invoiceDetail.model");
 const invoiceDetailFieldConfig = require("../config/fieldConfig/invoiceDetail.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  * */
 
 const createInvoiceDetail = async (invoiceDetailData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       invoiceDetailData,
@@ -27,15 +25,9 @@ const createInvoiceDetail = async (invoiceDetailData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO invoicedetail (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const result = await InvoiceDetail.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!result) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Invoice detail creation failed"
@@ -44,12 +36,10 @@ const createInvoiceDetail = async (invoiceDetailData) => {
 
     return {
       message: "Invoice detail created successfully",
-      invoiceDetailId: result.insertId,
+      invoiceDetailId: result.invoiceDetailID,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -61,21 +51,16 @@ const createInvoiceDetail = async (invoiceDetailData) => {
  * */
 
 const getInvoiceDetailById = async (invoiceDetailId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `SELECT * FROM invoicedetail WHERE invoiceDetailID = ?`;
-    const [rows] = await connection.execute(query, [invoiceDetailId]);
+    const invoiceDetail = await InvoiceDetail.findByPk(invoiceDetailId);
 
-    if (rows.length === 0) {
+    if (!invoiceDetail) {
       throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
     }
 
-    return rows[0];
+    return invoiceDetail;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -88,31 +73,26 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
  * */
 
 const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!invoiceId) {
       throw new ApiError(status.BAD_REQUEST, "Invoice ID is required");
     }
 
-    const query = `SELECT * FROM invoicedetail WHERE invoiceID = ?`;
-    const [rows] = await connection.execute(query, [invoiceId]);
+    const invoiceDetails = await InvoiceDetail.findAll({
+      where: { invoiceID: invoiceId }
+    });
 
-    if (rows.length === 0) {
+    if (invoiceDetails.length === 0) {
       throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
     }
 
-    return rows;
+    return invoiceDetails;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
 const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
-    const connection = await db.getConnection();
-    
     try {
         if (!invoiceDetailId) {
         throw new ApiError(status.BAD_REQUEST, "Invoice detail ID is required");
@@ -129,15 +109,11 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
         }
     
-        const query = `UPDATE invoicedetail SET ${entries
-        .map(([key]) => `${key} = ?`)
-        .join(", ")} WHERE invoiceDetailID = ?`;
+        const [affectedRows] = await InvoiceDetail.update(fields, {
+            where: { invoiceDetailID: invoiceDetailId }
+        });
     
-        const values = [...entries.map(([_, value]) => value), invoiceDetailId];
-    
-        const [result] = await connection.execute(query, values);
-    
-        if (result.affectedRows === 0) {
+        if (affectedRows === 0) {
         throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
         }
     
@@ -146,8 +122,6 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         };
     } catch (error) {
         throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-        connection.release();
     }
 }
 
@@ -159,17 +133,16 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
  * */
 
 const deleteInvoiceDetail = async (invoiceDetailId) => {
-    const connection = await db.getConnection();
-    
     try {
         if (!invoiceDetailId) {
         throw new ApiError(status.BAD_REQUEST, "Invoice detail ID is required");
         }
     
-        const query = `DELETE FROM invoicedetail WHERE invoiceDetailID = ?`;
-        const [result] = await connection.execute(query, [invoiceDetailId]);
+        const affectedRows = await InvoiceDetail.destroy({
+            where: { invoiceDetailID: invoiceDetailId }
+        });
     
-        if (result.affectedRows === 0) {
+        if (affectedRows === 0) {
         throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
         }
     
@@ -178,8 +151,6 @@ const deleteInvoiceDetail = async (invoiceDetailId) => {
         };
     } catch (error) {
         throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-        connection.release();
     }
 }
 

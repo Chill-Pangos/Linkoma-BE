@@ -1,5 +1,5 @@
 const ApiError = require("../utils/apiError");
-const db = require("../config/database");
+const User = require("../models/user.model");
 const { status } = require("http-status");
 const bcrypt = require("bcryptjs");
 const userService = require("./user.service");

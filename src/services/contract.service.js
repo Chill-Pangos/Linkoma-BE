@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const Contract = require("../models/contract.model");
 const contractFieldConfig = require("../config/fieldConfig/contract.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -14,8 +14,6 @@ const filterValidFields = require("../utils/filterValidFields");
  * */
 
 const createContract = async (contractData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       contractData,
@@ -28,15 +26,9 @@ const createContract = async (contractData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO contract (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const contract = await Contract.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!contract) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Contract creation failed"
@@ -45,12 +37,10 @@ const createContract = async (contractData) => {
 
     return {
       message: "Contract created successfully",
-      contractId: result.insertId,
+      contractId: contract.contractId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -63,25 +53,20 @@ const createContract = async (contractData) => {
  */
 
 const getContractById = async (contractId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!contractId) {
       throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
     }
 
-    const query = "SELECT * FROM contract WHERE contractID = ?";
-    const [rows] = await connection.execute(query, [contractId]);
+    const contract = await Contract.findByPk(contractId);
 
-    if (rows.length === 0) {
+    if (!contract) {
       throw new ApiError(status.NOT_FOUND, "Contract not found");
     }
 
-    return rows[0];
+    return contract;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -95,22 +80,20 @@ const getContractById = async (contractId) => {
  */
 
 const getContracts = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const query =
-      "SELECT * FROM contract ORDER BY apartmentID LIMIT ? OFFSET ?";
-    const [rows] = await connection.execute(query, [limit, offset]);
+    const contracts = await Contract.findAll({
+      limit: limit,
+      offset: offset,
+      order: [['apartmentId', 'ASC']]
+    });
 
-    if (rows.length === 0) {
+    if (contracts.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No contracts found");
     }
 
-    return rows;
+    return contracts;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -124,8 +107,6 @@ const getContracts = async (limit, offset) => {
  */
 
 const updateContract = async (contractId, contractData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!contractId) {
       throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
@@ -142,15 +123,11 @@ const updateContract = async (contractId, contractData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE contract SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE contractID = ?`;
+    const [affectedRows] = await Contract.update(fields, {
+      where: { contractId: contractId }
+    });
 
-    const values = [...entries.map(([_, value]) => value), contractId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Contract update failed"
@@ -159,12 +136,10 @@ const updateContract = async (contractId, contractData) => {
 
     return {
       message: "Contract updated successfully",
-      contractId: result.insertId,
+      contractId: contractId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -177,17 +152,16 @@ const updateContract = async (contractId, contractData) => {
  */
 
 const deleteContract = async (contractId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!contractId) {
       throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
     }
 
-    const query = "DELETE FROM contract WHERE contractID = ?";
-    const [result] = await connection.execute(query, [contractId]);
+    const deletedRows = await Contract.destroy({
+      where: { contractId: contractId }
+    });
 
-    if (result.affectedRows === 0) {
+    if (deletedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Contract not found");
     }
 
@@ -197,8 +171,6 @@ const deleteContract = async (contractId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

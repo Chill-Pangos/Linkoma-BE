@@ -1,5 +1,5 @@
 module.exports = {
-    user: reqruire('./user.fieldconfig'),
+    user: require('./user.fieldconfig'),
     announcement: require('./announcement.fieldconfig'),
     apartment: require('./apartment.fieldconfig'),
     apartmentType: require('./apartmentType.fieldconfig'),

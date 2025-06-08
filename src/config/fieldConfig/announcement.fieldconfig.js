@@ -1,12 +1,24 @@
 module.exports = {
   insertableFields: [
     "type",
-    "priority",
+    "priority", 
     "title",
     "content",
-    "postedDate",
     "author",
   ],
-  updatableFields: ["priority", "title", "content"],
-  searchableFields: ["announcementID", "type", "priority", "postedDate"],
+  updatableFields: [
+    "type",
+    "priority", 
+    "title", 
+    "content"
+  ],
+  searchableFields: [
+    "announcementId", 
+    "type", 
+    "priority", 
+    "title",
+    "author",
+    "createdAt",
+    "updatedAt"
+  ],
 };

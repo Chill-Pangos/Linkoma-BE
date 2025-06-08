@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const Announcement = require("../models/announcement.model");
 const announcementFieldConfig = require("../config/fieldConfig/announcement.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -14,8 +14,6 @@ const filterValidFields = require("../utils/filterValidFields");
  * */
 
 const createAnnouncement = async (announcementData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       announcementData,
@@ -28,15 +26,9 @@ const createAnnouncement = async (announcementData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO anouncement (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const announcement = await Announcement.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!announcement) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Announcement creation failed"
@@ -45,12 +37,10 @@ const createAnnouncement = async (announcementData) => {
 
     return {
       message: "Announcement created successfully",
-      announcementId: result.insertId,
+      announcementId: announcement.announcementId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -64,25 +54,20 @@ const createAnnouncement = async (announcementData) => {
  * */
 
 const getAnnouncementById = async (announcementId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!announcementId) {
       throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
     }
 
-    const query = "SELECT * FROM announcement WHERE announcementID = ?";
-    const [rows] = await connection.execute(query, [announcementId]);
+    const announcement = await Announcement.findByPk(announcementId);
 
-    if (rows.length === 0) {
+    if (!announcement) {
       throw new ApiError(status.NOT_FOUND, "Announcement not found");
     }
 
-    return rows[0];
+    return announcement;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -96,26 +81,22 @@ const getAnnouncementById = async (announcementId) => {
  *
  */
 
-const getAnnouncements = async (limit, offset) => {
-  const connection = await db.getConnection();
+  const getAnnouncements = async (limit, offset) => {
+    try {
+      const announcements = await Announcement.findAll({
+      order: [["createdAt", "DESC"]],
+        
+      limit: limit,
+      offset: offset,
+    });
 
-  try {
-    const query =
-      "SELECT * FROM announcement ORDER BY createdAt DESC LIMIT ? OFFSET ?";
-
-    const values = [limit, offset];
-
-    const [rows] = await connection.execute(query, values);
-
-    if (rows.length === 0) {
+    if (announcements.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No announcements found");
     }
 
-    return rows;
+    return announcements;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -130,8 +111,6 @@ const getAnnouncements = async (limit, offset) => {
  */
 
 const updateAnnouncement = async (announcementId, announcementData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!announcementId) {
       throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
@@ -148,15 +127,11 @@ const updateAnnouncement = async (announcementId, announcementData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE announcement SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE announcementID = ?`;
+    const [affectedRows] = await Announcement.update(fields, {
+      where: { announcementId: announcementId },
+    });
 
-    const values = [...entries.map(([_, value]) => value), announcementId];
-
-    const [result] = connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Announcement update failed"
@@ -165,12 +140,10 @@ const updateAnnouncement = async (announcementId, announcementData) => {
 
     return {
       message: "Announcement updated successfully",
-      announcementId: result.insertId,
+      announcementId: announcementId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -184,17 +157,16 @@ const updateAnnouncement = async (announcementId, announcementData) => {
  */
 
 const deleteAnnouncement = async (announcementId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!announcementId) {
       throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
     }
 
-    const query = "DELETE FROM announcement WHERE announcementID = ?";
-    const [result] = await connection.execute(query, [announcementId]);
+    const deletedRows = await Announcement.destroy({
+      where: { announcementId: announcementId },
+    });
 
-    if (result.affectedRows === 0) {
+    if (deletedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Announcement not found");
     }
 
@@ -203,8 +175,6 @@ const deleteAnnouncement = async (announcementId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

@@ -1,12 +1,12 @@
 module.exports = {
   insertableFields: [
-    "apartmentID",
-    "serviceTypeID",
+    "apartmentId",
+    "serviceTypeId",
     "startDate",
     "endDate",
     "status",
     "note",
   ],
   updatableFields: ["status", "endDate", "note"],
-  searchableFields: ["serviceRegistrationID", "apartmentID", "serviceTypeID"],
+  searchableFields: ["serviceRegistrationId", "apartmentId", "serviceTypeId", "startDate", "endDate", "status", "createdAt", "updatedAt"],
 };

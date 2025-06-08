@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const ServiceType = require("../models/serviceType.model");
 const serviceTypeFieldConfig = require("../config/fieldConfig/serviceType.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  * */
 
 const createServiceType = async (serviceTypeData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       serviceTypeData,
@@ -27,15 +25,9 @@ const createServiceType = async (serviceTypeData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO servicetype (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const result = await ServiceType.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!result) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Service type creation failed"
@@ -44,12 +36,10 @@ const createServiceType = async (serviceTypeData) => {
 
     return {
       message: "Service type created successfully",
-      serviceTypeId: result.insertId,
+      serviceTypeId: result.serviceTypeID,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -61,25 +51,20 @@ const createServiceType = async (serviceTypeData) => {
  * */
 
 const getServiceTypeById = async (serviceTypeId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceTypeId) {
       throw new ApiError(status.BAD_REQUEST, "Service type ID is required");
     }
 
-    const query = `SELECT * FROM servicetype WHERE serviceTypeID = ?`;
-    const [rows] = await connection.execute(query, [serviceTypeId]);
+    const serviceType = await ServiceType.findByPk(serviceTypeId);
 
-    if (rows.length === 0) {
+    if (!serviceType) {
       throw new ApiError(status.NOT_FOUND, "Service type not found");
     }
 
-    return rows[0];
+    return serviceType;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -93,21 +78,20 @@ const getServiceTypeById = async (serviceTypeId) => {
  * */
 
 const getServiceTypes = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `SELECT * FROM servicetype ORDER BY serviceTypeID LIMIT ? OFFSET ?`;
-    const [rows] = await connection.execute(query, [limit, offset]);
+    const serviceTypes = await ServiceType.findAll({
+      limit: limit,
+      offset: offset,
+      order: [['serviceTypeID', 'ASC']]
+    });
 
-    if (rows.length === 0) {
+    if (serviceTypes.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No service types found");
     }
 
-    return rows;
+    return serviceTypes;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -119,8 +103,6 @@ const getServiceTypes = async (limit, offset) => {
  * */
 
 const updateServiceType = async (serviceTypeId, serviceTypeData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceTypeId) {
       throw new ApiError(status.BAD_REQUEST, "Service type ID is required");
@@ -137,15 +119,11 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE servicetype SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE serviceTypeID = ?`;
+    const [affectedRows] = await ServiceType.update(fields, {
+      where: { serviceTypeID: serviceTypeId }
+    });
 
-    const values = [...entries.map(([_, value]) => value), serviceTypeId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Service type not found");
     }
 
@@ -155,8 +133,6 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -168,17 +144,16 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
  * */
 
 const deleteServiceType = async (serviceTypeId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceTypeId) {
       throw new ApiError(status.BAD_REQUEST, "Service type ID is required");
     }
 
-    const query = `DELETE FROM servicetype WHERE serviceTypeID = ?`;
-    const [result] = await connection.execute(query, [serviceTypeId]);
+    const affectedRows = await ServiceType.destroy({
+      where: { serviceTypeID: serviceTypeId }
+    });
 
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Service type not found");
     }
 
@@ -188,8 +163,6 @@ const deleteServiceType = async (serviceTypeId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

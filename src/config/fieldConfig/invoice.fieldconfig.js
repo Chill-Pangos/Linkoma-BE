@@ -1,11 +1,11 @@
 module.exports = {
   insertableFields: [
-    "apartmentID",
+    "apartmentId",
     "rentFee",
     "serviceFee",
     "dueDate",
     "status",
   ],
   updatableFields: ["rentFee", "serviceFee", "status"],
-  searchableFields: ["invoiceID", "apartmentID", "dueDate", "status"],
+  searchableFields: ["invoiceId", "apartmentId", "dueDate", "status", "createdAt", "updatedAt"],
 };
