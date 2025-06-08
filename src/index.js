@@ -1,7 +1,6 @@
 const app = require("./app");
 const config = require("./config/config");
 const db = require("./config/database");
-const { CreateUser, GetUserById } = require("./services/user.service");
 
 async function checkConnection() {
   try {
@@ -11,11 +10,7 @@ async function checkConnection() {
   catch (error) {
     console.error("Database connection failed:", error);
     process.exit(1);
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
+  } 
 }
 
 checkConnection().then(() => {

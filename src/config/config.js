@@ -11,8 +11,17 @@ const envSchema = Joi.object()
       .required(),
     PORT: Joi.number().default(3000).description("Server port"),
     HOST: Joi.string().required().description("MySQL host"),
-    DB_URL: Joi.string().uri().description("MySQL database URL"),
+    DB_CA: Joi.string()
+      .description("MySQL CA certificate path, if using SSL"),
+    DB_HOST: Joi.string()
+      .default("localhost")
+      .description("MySQL database host, default is localhost"),
+    DB_PORT: Joi.number()
+      .default(3306)
+      .description("MySQL database port, default is 3306"),
     DATABASE: Joi.string().required().description("MySQL database name"),
+    USER: Joi.string().required().description("MySQL database user"),
+    PASSWORD: Joi.string().required().description("MySQL database password"),
     JWT_SECRET: Joi.string().required().description("JWT secret key"),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number()
       .default(30)
@@ -45,9 +54,12 @@ module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mysql: {
-    host: envVars.HOST,
-    url: envVars.DB_URL,
+    host: envVars.DB_HOST,
+    port: envVars.DB_PORT,
+    ca: envVars.DB_CA,
     database: envVars.DATABASE,
+    username: envVars.USER,
+    password: envVars.PASSWORD,
   },
   jwt: {
     secret: envVars.JWT_SECRET,
