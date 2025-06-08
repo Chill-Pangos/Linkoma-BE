@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const day = require("dayjs");
 const { tokenTypes } = require("../config/tokens");
 const config = require("../config/config");
-const db = require("../config/database");
+const Token = require("../models/tokens.model");
 const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const { ref } = require("joi");
@@ -45,24 +45,22 @@ const generateToken = async (
  */
 
 const saveToken = async (token, userId, type, expires, revoked = false) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `
-      INSERT INTO tokens (token, userID, expires, revoked)
-      VALUES (?, ?, ?, ?)
-    `;
+    const tokenData = {
+      token,
+      userID: userId,
+      expires,
+      revoked
+    };
 
-    const values = [token, userId, expires, revoked];
+    const savedToken = await Token.create(tokenData);
 
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!savedToken) {
       throw new ApiError(status.INTERNAL_SERVER_ERROR, "Token not saved");
     }
 
     return {
-      id: result.insertId,
+      id: savedToken.tokenId,
       token,
       userId,
       type,
@@ -71,8 +69,6 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    await connection.release();
   }
 };
 
@@ -99,26 +95,22 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
   }
 
   if (payload.type === tokenTypes.REFRESH) {
-    const connection = await db.getConnection();
     try {
-      const query = `
-            SELECT * FROM tokens 
-            WHERE token = ? AND userID = ? AND revoked = false AND expires > NOW()
-        `;
+      const tokenRecord = await Token.findOne({
+        where: {
+          token: token,
+          userId: payload.sub,
+          revoked: false,
+        },
+      });
 
-      const values = [token, payload.sub];
-
-      const [rows] = await connection.execute(query, values);
-
-      if (rows.length === 0) {
+      if (!tokenRecord || new Date() > tokenRecord.expires) {
         throw new ApiError(status.UNAUTHORIZED, "Token not found or invalid");
       }
 
-      return rows[0];
+      return tokenRecord;
     } catch (error) {
       throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-      await connection.release();
     }
   }
 
@@ -187,20 +179,18 @@ const generateAuthTokens = async (userId) => {
  */
 
 const revokeToken = async (token, userId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `
-            UPDATE tokens 
-            SET revoked = true 
-            WHERE token = ? AND userID = ?
-        `;
+    const [affectedRows] = await Token.update(
+      { revoked: true },
+      {
+        where: {
+          token: token,
+          userId: userId,
+        },
+      }
+    );
 
-    const values = [token, userId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
         status.NOT_FOUND,
         "Token not found or already revoked"
@@ -210,8 +200,6 @@ const revokeToken = async (token, userId) => {
     return { message: "Token revoked successfully" };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    await connection.release();
   }
 };
 
@@ -223,26 +211,23 @@ const revokeToken = async (token, userId) => {
  */
 
 const revokeAllTokens = async (userId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = `
-            UPDATE tokens 
-            SET revoked = true 
-            WHERE userID = ?
-        `;
+    const [affectedRows] = await Token.update(
+      { revoked: true },
+      {
+        where: {
+          userId: userId,
+        },
+      }
+    );
 
-    const [result] = await connection.execute(query, [userId]);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "No tokens found for this user");
     }
 
     return { message: "All tokens revoked successfully" };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    await connection.release();
   }
 };
 

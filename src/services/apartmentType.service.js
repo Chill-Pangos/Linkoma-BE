@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const ApartmentType = require("../models/apartmentType.model");
 const apartmentTypeFieldConfig = require("../config/fieldConfig/apartmentType.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  */
 
 const createApartmentType = async (apartmentTypeData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       apartmentTypeData,
@@ -27,15 +25,9 @@ const createApartmentType = async (apartmentTypeData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO apartmenttype (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const result = await ApartmentType.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [rows] = await connection.execute(query, values);
-
-    if (rows.affectedRows === 0) {
+    if (!result) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment type creation failed"
@@ -44,12 +36,10 @@ const createApartmentType = async (apartmentTypeData) => {
 
     return {
       message: "Apartment type created successfully",
-      apartmentTypeId: rows.insertId,
+      apartmentTypeId: result.apartmentTypeID,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -62,27 +52,20 @@ const createApartmentType = async (apartmentTypeData) => {
  */
 
 const getApartmentTypeById = async (apartmentTypeId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!apartmentTypeId) {
       throw new ApiError(status.BAD_REQUEST, "Apartment type ID is required");
     }
 
-    const [rows] = await connection.execute(
-      "SELECT * FORM apartmettype WHERE appartmentTypeID = ?",
-      [apartmentTypeId]
-    );
+    const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
 
-    if (rows.length === 0) {
+    if (!apartmentType) {
       throw new ApiError(status.NOT_FOUND, "Apartment type not found");
     }
 
-    return rows[0];
+    return apartmentType;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -96,31 +79,26 @@ const getApartmentTypeById = async (apartmentTypeId) => {
  */
 
 const getApartmentTypes = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const [rows] = await connection.execute(
-      "SELECT * FROM apartmenttype ORDER BY apartmentTypeID LIMIT ? OFFSET ?",
-      [limit, offset]
-    );
+    const apartmentTypes = await ApartmentType.findAll({
+      limit: limit,
+      offset: offset,
+      order: [['apartmentTypeID', 'ASC']]
+    });
 
-    if (rows.length === 0) {
+    if (apartmentTypes.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No apartment types found");
     }
 
-    const [[{ totalCount }]] = await connection.execute(
-      "SELECT COUNT(*) as totalCount FROM apartmenttype"
-    );
+    const totalCount = await ApartmentType.count();
 
     return {
-      data: rows,
+      data: apartmentTypes,
       totalPages: Math.ceil(totalCount / limit),
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -134,8 +112,6 @@ const getApartmentTypes = async (limit, offset) => {
  */
 
 const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!apartmentTypeId) {
       throw new ApiError(status.BAD_REQUEST, "Apartment type ID is required");
@@ -152,21 +128,14 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE apartmenttype SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE apartmentTypeID = ?`;
+    const [affectedRows] = await ApartmentType.update(fields, {
+      where: { apartmentTypeID: apartmentTypeId }
+    });
 
-    const values = entries.map(([_, value]) => value);
-
-    const [rows] = await connection.execute(query, [
-      ...values,
-      apartmentTypeId,
-    ]);
-
-    if (rows.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
-        status.INTERNAL_SERVER_ERROR,
-        "Apartment type update failed"
+        status.NOT_FOUND,
+        "Apartment type not found"
       );
     }
 
@@ -176,8 +145,6 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -190,29 +157,24 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
  */
 
 const deleteApartmentType = async (apartmentTypeId) => {
-    const connection = await db.getConnection();
-    
     try {
         if (!apartmentTypeId) {
         throw new ApiError(status.BAD_REQUEST, "Apartment type ID is required");
         }
     
-        const [rows] = await connection.execute(
-        "DELETE FROM apartmenttype WHERE apartmentTypeID = ?",
-        [apartmentTypeId]
-        );
+        const affectedRows = await ApartmentType.destroy({
+            where: { apartmentTypeID: apartmentTypeId }
+        });
     
-        if (rows.affectedRows === 0) {
+        if (affectedRows === 0) {
         throw new ApiError(status.NOT_FOUND, "Apartment type not found");
         }
     
         return { message: "Apartment type deleted successfully" };
     } catch (error) {
         throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-    } finally {
-        connection.release();
     }
-    }
+}
 
 module.exports = {
   createApartmentType,

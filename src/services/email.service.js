@@ -33,9 +33,9 @@ const sendResetPasswordEmail = async (toEmail, resetToken) => {
             message: 'Reset password email sent successfully',
         };
     } catch (error) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR,'Failed to send reset password email');
+        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
     }
-}
+}   
 
 module.exports = {
     sendResetPasswordEmail, 

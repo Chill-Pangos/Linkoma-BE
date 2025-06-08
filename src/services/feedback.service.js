@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const Feedback = require("../models/feedback.model");
 const feedbackFieldConfig = require("../config/fieldConfig/feedback.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  *  * */
 
 const createFeedback = async (feedbackData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       feedbackData,
@@ -27,15 +25,9 @@ const createFeedback = async (feedbackData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO feedback (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const feedback = await Feedback.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!feedback) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Feedback creation failed"
@@ -44,12 +36,10 @@ const createFeedback = async (feedbackData) => {
 
     return {
       message: "Feedback created successfully",
-      feedbackId: result.insertId,
+      feedbackId: feedback.feedbackId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -61,25 +51,20 @@ const createFeedback = async (feedbackData) => {
  * */
 
 const getFeedbackById = async (feedbackId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!feedbackId) {
       throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
     }
 
-    const query = "SELECT * FROM feedback WHERE feedbackID = ?";
-    const [rows] = await connection.execute(query, [feedbackId]);
+    const feedback = await Feedback.findByPk(feedbackId);
 
-    if (rows.length === 0) {
+    if (!feedback) {
       throw new ApiError(status.NOT_FOUND, "Feedback not found");
     }
 
-    return rows[0];
+    return feedback;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -92,22 +77,20 @@ const getFeedbackById = async (feedbackId) => {
  * */
 
 const getFeedbacks = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "SELECT * FROM feedback ORDER BY createdAt LIMIT ? OFFSET ?";
+    const feedbacks = await Feedback.findAll({
+      limit: limit,
+      offset: offset,
+      order: [['createdAt', 'ASC']]
+    });
 
-    const [rows] = await connection.execute(query, [limit, offset]);
-
-    if (rows.length === 0) {
+    if (feedbacks.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No feedback found");
     }
 
-    return rows;
+    return feedbacks;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -120,8 +103,6 @@ const getFeedbacks = async (limit, offset) => {
  * */
 
 const updateFeedback = async (feedbackId, feedbackData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!feedbackId) {
       throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
@@ -138,15 +119,11 @@ const updateFeedback = async (feedbackId, feedbackData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE feedback SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE feedbackID = ?`;
+    const [affectedRows] = await Feedback.update(fields, {
+      where: { feedbackId: feedbackId }
+    });
 
-    const values = [...entries.map(([_, value]) => value), feedbackId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Feedback update failed"
@@ -159,8 +136,6 @@ const updateFeedback = async (feedbackId, feedbackData) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -172,17 +147,16 @@ const updateFeedback = async (feedbackId, feedbackData) => {
  * */
 
 const deleteFeedback = async (feedbackId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!feedbackId) {
       throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
     }
 
-    const query = "DELETE FROM feedback WHERE feedbackID = ?";
-    const [result] = await connection.execute(query, [feedbackId]);
+    const deletedRows = await Feedback.destroy({
+      where: { feedbackId: feedbackId }
+    });
 
-    if (result.affectedRows === 0) {
+    if (deletedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Feedback not found");
     }
 
@@ -192,8 +166,6 @@ const deleteFeedback = async (feedbackId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

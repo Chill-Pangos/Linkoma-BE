@@ -5,7 +5,7 @@ module.exports = {
     "numBedrooms",
     "numBathrooms",
     "rentFee",
-    "decription",
+    "description",
   ],
   updatableFields: [
     "typeName",
@@ -13,14 +13,16 @@ module.exports = {
     "numBedrooms",
     "numBathrooms",
     "rentFee",
-    "decription",
+    "description",
   ],
   searchableFields: [
-    "apartmentTypeID",
+    "apartmentTypeId",
     "typeName",
     "area",
     "numBedrooms",
     "numBathrooms",
     "rentFee",
+    "createdAt",
+    "updatedAt"
   ],
 };

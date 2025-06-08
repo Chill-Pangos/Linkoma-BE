@@ -1,6 +1,6 @@
-const db = require("../config/database");
+const ServiceRegistration = require("../models/serviceRegistration.model");
 const serviceRegistrationFieldConfig = require("../config/fieldConfig/serviceRegistration.fieldconfig");
-const ApiError = require("../utils/ApiError");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -13,8 +13,6 @@ const filterValidFields = require("../utils/filterValidFields");
  * */
 
 const createServiceRegistration = async (serviceRegistrationData) => {
-  const connection = await db.getConnection();
-
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       serviceRegistrationData,
@@ -27,15 +25,9 @@ const createServiceRegistration = async (serviceRegistrationData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO serviceregistration (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const result = await ServiceRegistration.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!result) {
       throw new ApiError(
         status.INTERNAL_SERVER_ERROR,
         "Service registration creation failed"
@@ -44,12 +36,10 @@ const createServiceRegistration = async (serviceRegistrationData) => {
 
     return {
       message: "Service registration created successfully",
-      serviceRegistrationId: result.insertId,
+      serviceRegistrationId: result.serviceRegistrationID,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -61,8 +51,6 @@ const createServiceRegistration = async (serviceRegistrationData) => {
  * */
 
 const getServiceRegistrationById = async (serviceRegistrationId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceRegistrationId) {
       throw new ApiError(
@@ -71,18 +59,15 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
       );
     }
 
-    const query = `SELECT * FROM serviceregistration WHERE serviceRegistrationID = ?`;
-    const [rows] = await connection.execute(query, [serviceRegistrationId]);
+    const serviceRegistration = await ServiceRegistration.findByPk(serviceRegistrationId);
 
-    if (rows.length === 0) {
+    if (!serviceRegistration) {
       throw new ApiError(status.NOT_FOUND, "Service registration not found");
     }
 
-    return rows[0];
+    return serviceRegistration;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -94,25 +79,22 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
  * */
 
 const getServiceRegistrationByApartmentId = async (apartmentId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!apartmentId) {
       throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
     }
 
-    const query = `SELECT * FROM serviceregistration WHERE apartmentID = ?`;
-    const [rows] = await connection.execute(query, [apartmentId]);
+    const serviceRegistrations = await ServiceRegistration.findAll({
+      where: { apartmentID: apartmentId }
+    });
 
-    if (rows.length === 0) {
+    if (serviceRegistrations.length === 0) {
       throw new ApiError(status.NOT_FOUND, "Service registration not found");
     }
 
-    return rows[0];
+    return serviceRegistrations;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -128,8 +110,6 @@ const updateServiceRegistration = async (
   serviceRegistrationId,
   serviceRegistrationData
 ) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceRegistrationId) {
       throw new ApiError(
@@ -149,32 +129,23 @@ const updateServiceRegistration = async (
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE serviceregistration SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE serviceRegistrationID = ?`;
+    const [affectedRows] = await ServiceRegistration.update(fields, {
+      where: { serviceRegistrationID: serviceRegistrationId }
+    });
 
-    const values = [
-      ...entries.map(([_, value]) => value),
-      serviceRegistrationId,
-    ];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(
-        status.INTERNAL_SERVER_ERROR,
-        "Service registration update failed"
+        status.NOT_FOUND,
+        "Service registration not found"
       );
     }
 
     return {
       message: "Service registration updated successfully",
-      serviceRegistrationId: result.insertId,
+      serviceRegistrationId: serviceRegistrationId,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -186,8 +157,6 @@ const updateServiceRegistration = async (
  * */
 
 const deleteServiceRegistration = async (serviceRegistrationId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!serviceRegistrationId) {
       throw new ApiError(
@@ -196,10 +165,11 @@ const deleteServiceRegistration = async (serviceRegistrationId) => {
       );
     }
 
-    const query = `DELETE FROM serviceregistration WHERE serviceRegistrationID = ?`;
-    const [result] = await connection.execute(query, [serviceRegistrationId]);
+    const affectedRows = await ServiceRegistration.destroy({
+      where: { serviceRegistrationID: serviceRegistrationId }
+    });
 
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Service registration not found");
     }
 
@@ -208,8 +178,6 @@ const deleteServiceRegistration = async (serviceRegistrationId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 

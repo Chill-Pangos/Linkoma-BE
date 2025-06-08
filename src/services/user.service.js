@@ -1,4 +1,4 @@
-const db = require("../config/database");
+const User = require("../models/user.model");
 const userFieldConfig = require("../config/fieldConfig/user.fieldconfig");
 const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
@@ -14,7 +14,6 @@ const bcrypt = require("bcryptjs");
  */
 
 const createUser = async (userData) => {
-  const connection = await db.getConnection();
   try {
     const fields = filterValidFields.filterValidFieldsFromObject(
       userData,
@@ -32,23 +31,15 @@ const createUser = async (userData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `INSERT INTO user (${entries
-      .map(([key]) => key)
-      .join(", ")}) VALUES (${entries.map(() => "?").join(", ")})`;
+    const user = await User.create(fields);
 
-    const values = entries.map(([_, value]) => value);
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!user) {
       throw new ApiError(status.INTERNAL_SERVER_ERROR, "User creation failed");
     }
 
-    return { message: "User created successfully", userId: result.insertId };
+    return { message: "User created successfully", userId: user.userId };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -61,26 +52,20 @@ const createUser = async (userData) => {
  */
 
 const getUserById = async (userId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!userId) {
       throw new ApiError(status.BAD_REQUEST, "User ID is required");
     }
 
-    const [rows] = await connection.execute(
-      "SELECT * FROM user WHERE userID = ?",
-      [userId]
-    );
-    if (rows.length === 0) {
+    const user = await User.findByPk(userId);
+    
+    if (!user) {
       throw new ApiError(status.NOT_FOUND, "User not found");
     }
 
-    return rows[0];
+    return user;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -94,31 +79,26 @@ const getUserById = async (userId) => {
  */
 
 const getUsers = async (limit, offset) => {
-  const connection = await db.getConnection();
-
   try {
-    const [rows] = await connection.execute(
-      "SELECT * FROM user ORDER BY userID LIMIT ? OFFSET ?",
-      [limit, offset]
-    );
+    const users = await User.findAll({
+      limit: limit,
+      offset: offset,
+      order: [['userId', 'ASC']]
+    });
 
-    if (rows.length === 0) {
+    if (users.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No users found");
     }
 
-    const [[{ totalCount }]] = await connection.execute(
-      "SELECT COUNT(*) as total FROM user"
-    );
+    const totalCount = await User.count();
 
     return {
-      data: rows,
+      data: users,
       totalPages: Math.ceil(totalCount / limit),
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -132,8 +112,6 @@ const getUsers = async (limit, offset) => {
  */
 
 const updateUser = async (userId, userData) => {
-  const connection = await db.getConnection();
-
   try {
     if (!userId) {
       throw new ApiError(status.BAD_REQUEST, "User ID is required");
@@ -155,23 +133,17 @@ const updateUser = async (userId, userData) => {
       throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
-    const query = `UPDATE user SET ${entries
-      .map(([key]) => `${key} = ?`)
-      .join(", ")} WHERE userID = ?`;
+    const [affectedRows] = await User.update(fields, {
+      where: { userId: userId }
+    });
 
-    const values = [...entries.map(([_, value]) => value), userId];
-
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.INTERNAL_SERVER_ERROR, "User update failed");
     }
 
     return { message: "User updated successfully", userId: userId };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -184,27 +156,22 @@ const updateUser = async (userId, userData) => {
  */
 
 const deleteUser = async (userId) => {
-  const connection = await db.getConnection();
-
   try {
     if (!userId) {
       throw new ApiError(status.BAD_REQUEST, "User ID is required");
     }
 
-    const [rows] = await connection.execute(
-      "DELETE FROM user WHERE userID = ?",
-      [userId]
-    );
+    const deletedRows = await User.destroy({
+      where: { userId: userId }
+    });
 
-    if (rows.affectedRows === 0) {
+    if (deletedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "User not found");
     }
 
     return { message: "User deleted successfully" };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 };
 
@@ -217,27 +184,22 @@ const deleteUser = async (userId) => {
  */
 
 const getUserByEmail = async (email) => {
-  const connection = await db.getConnection();
-
   try {
     if(!email) {
       throw new ApiError(status.BAD_REQUEST, "Email is required");
     }
 
-    const [rows] = await connection.execute(
-      "SELECT * FROM user WHERE email = ?",
-      [email]
-    );
+    const user = await User.findOne({
+      where: { email: email }
+    });
 
-    if (rows.length === 0) {
+    if (!user) {
       throw new ApiError(status.NOT_FOUND, "User not found");
     }
 
-    return rows[0];
+    return user;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    await connection.release();
   }
 }
 

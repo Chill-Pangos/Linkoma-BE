@@ -1,5 +1,5 @@
-const db = require("../config/database");
-const ApiError = require("../utils/ApiError");
+const Permission = require("../models/permissions.model");
+const ApiError = require("../utils/apiError");
 const { status } = require("http-status");
 
 /**
@@ -11,26 +11,22 @@ const { status } = require("http-status");
  */
 
 const createPermission = async (permissionData) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "INSERT INTO permissions (role, permissionKey) VALUES (?, ?)";
-    const values = [permissionData.role, permissionData.permissionKey];
+    const result = await Permission.create({
+      role: permissionData.role,
+      permissionKey: permissionData.permissionKey
+    });
 
-    const [result] = await connection.execute(query, values);
-
-    if (result.affectedRows === 0) {
+    if (!result) {
       throw new ApiError(status.INTERNAL_SERVER_ERROR, "Permission creation failed");
     }
 
     return {
       message: "Permission created successfully",
-      permissionId: result.insertId,
+      permissionId: result.permissionID,
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 }
 
@@ -43,21 +39,16 @@ const createPermission = async (permissionData) => {
  */
 
 const getPermissionById = async (permissionId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "SELECT * FROM permissions WHERE permissionID = ?";
-    const [rows] = await connection.execute(query, [permissionId]);
+    const permission = await Permission.findByPk(permissionId);
 
-    if (rows.length === 0) {
+    if (!permission) {
       throw new ApiError(status.NOT_FOUND, "Permission not found");
     }
 
-    return rows[0];
+    return permission;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 }
 
@@ -69,21 +60,16 @@ const getPermissionById = async (permissionId) => {
  */
 
 const getAllPermissions = async () => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "SELECT * FROM permissions";
-    const [rows] = await connection.execute(query);
+    const permissions = await Permission.findAll();
 
-    if (rows.length === 0) {
+    if (permissions.length === 0) {
       throw new ApiError(status.NOT_FOUND, "No permissions found");
     }
 
-    return rows;
+    return permissions;
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 }
 
@@ -96,13 +82,12 @@ const getAllPermissions = async () => {
  */
 
 const deletePermission = async (permissionId) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "DELETE FROM permissions WHERE permissionID = ?";
-    const [result] = await connection.execute(query, [permissionId]);
+    const affectedRows = await Permission.destroy({
+      where: { permissionID: permissionId }
+    });
 
-    if (result.affectedRows === 0) {
+    if (affectedRows === 0) {
       throw new ApiError(status.NOT_FOUND, "Permission not found");
     }
 
@@ -111,8 +96,6 @@ const deletePermission = async (permissionId) => {
     };
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 }
 
@@ -126,21 +109,21 @@ const deletePermission = async (permissionId) => {
  */
 
 const checkPermission = async (role, permissionKey) => {
-  const connection = await db.getConnection();
-
   try {
-    const query = "SELECT * FROM permissions WHERE role = ? AND permissionKey = ?";
-    const [rows] = await connection.execute(query, [role, permissionKey]);
+    const permission = await Permission.findOne({
+      where: { 
+        role: role, 
+        permissionKey: permissionKey 
+      }
+    });
 
-    if (rows.length === 0) {
+    if (!permission) {
       throw new ApiError(status.FORBIDDEN, "Permission denied");
     }
 
     return true; 
   } catch (error) {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
-  } finally {
-    connection.release();
   }
 }
 

@@ -4,9 +4,8 @@ const db = require("./config/database");
 const { CreateUser, GetUserById } = require("./services/user.service");
 
 async function checkConnection() {
-  let connection;
   try {
-    connection = await db.getConnection();
+    await db.authenticate();
     console.log("Database connected successfully");
   }
   catch (error) {
