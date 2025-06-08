@@ -7,7 +7,7 @@
     "lint:commit": "commitlint --edit .git/COMMIT_EDITMSG",
     "prepare": "husky",
     "test": "exit 0",
-    "start": "pm2 start ecosystem.config.json --no--daemon",
+    "start": "pm2 start ecosystem.config.json --no-daemon",
     "dev": "cross-env NODE_ENV=development nodemon src/index.js"
   },
   "keywords": [],
