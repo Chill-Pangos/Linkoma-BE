@@ -1,6 +1,6 @@
 const Contract = require("../models/contract.model");
 const contractFieldConfig = require("../config/fieldConfig/contract.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -9,7 +9,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * @param {Object} contractData - The contract data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  *
  * */
 
@@ -23,13 +23,13 @@ const createContract = async (contractData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const contract = await Contract.create(fields);
 
     if (!contract) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Contract creation failed"
       );
@@ -40,7 +40,7 @@ const createContract = async (contractData) => {
       contractId: contract.contractId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -48,25 +48,25 @@ const createContract = async (contractData) => {
  * @description Get a contract by ID
  * @param {number} contractId - The ID of the contract to be retrieved
  * @return {Object} - The contract data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  *
  */
 
 const getContractById = async (contractId) => {
   try {
     if (!contractId) {
-      throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
     }
 
     const contract = await Contract.findByPk(contractId);
 
     if (!contract) {
-      throw new ApiError(status.NOT_FOUND, "Contract not found");
+      throw new apiError(status.NOT_FOUND, "Contract not found");
     }
 
     return contract;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -75,7 +75,7 @@ const getContractById = async (contractId) => {
  * @param {number} limit - The maximum number of contracts to retrieve
  * @param {number} offset - The number of contracts to skip
  * @return {Array} - The list of contracts
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  *
  */
 
@@ -88,12 +88,12 @@ const getContracts = async (limit, offset) => {
     });
 
     if (contracts.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No contracts found");
+      throw new apiError(status.NOT_FOUND, "No contracts found");
     }
 
     return contracts;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -102,14 +102,14 @@ const getContracts = async (limit, offset) => {
  * @param {number} contractId - The ID of the contract to be updated
  * @param {Object} contractData - The contract data to be updated
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  *
  */
 
 const updateContract = async (contractId, contractData) => {
   try {
     if (!contractId) {
-      throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
     }
     
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -120,7 +120,7 @@ const updateContract = async (contractId, contractData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await Contract.update(fields, {
@@ -128,7 +128,7 @@ const updateContract = async (contractId, contractData) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Contract update failed"
       );
@@ -139,7 +139,7 @@ const updateContract = async (contractId, contractData) => {
       contractId: contractId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -147,14 +147,14 @@ const updateContract = async (contractId, contractData) => {
  * @description Delete a contract by ID
  * @param {number} contractId - The ID of the contract to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  *
  */
 
 const deleteContract = async (contractId) => {
   try {
     if (!contractId) {
-      throw new ApiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
     }
 
     const deletedRows = await Contract.destroy({
@@ -162,7 +162,7 @@ const deleteContract = async (contractId) => {
     });
 
     if (deletedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "Contract not found");
+      throw new apiError(status.NOT_FOUND, "Contract not found");
     }
 
     return {
@@ -170,7 +170,7 @@ const deleteContract = async (contractId) => {
       contractId: contractId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 

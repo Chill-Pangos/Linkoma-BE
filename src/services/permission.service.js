@@ -1,5 +1,5 @@
 const Permission = require("../models/permissions.model");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 
 /**
@@ -7,7 +7,7 @@ const { status } = require("http-status");
  *
  * @param {Object} permissionData - The role data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  */
 
 const createPermission = async (permissionData) => {
@@ -18,7 +18,7 @@ const createPermission = async (permissionData) => {
     });
 
     if (!result) {
-      throw new ApiError(status.INTERNAL_SERVER_ERROR, "Permission creation failed");
+      throw new apiError(status.INTERNAL_SERVER_ERROR, "Permission creation failed");
     }
 
     return {
@@ -26,7 +26,7 @@ const createPermission = async (permissionData) => {
       permissionId: result.permissionID,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 
@@ -35,7 +35,7 @@ const createPermission = async (permissionData) => {
  *
  * @param {number} permissionId - The ID of the permission to be retrieved
  * @return {Object} - The permission data
- * @throws {ApiError} - If the permission is not found or if there is an error during the retrieval
+ * @throws {apiError} - If the permission is not found or if there is an error during the retrieval
  */
 
 const getPermissionById = async (permissionId) => {
@@ -43,12 +43,12 @@ const getPermissionById = async (permissionId) => {
     const permission = await Permission.findByPk(permissionId);
 
     if (!permission) {
-      throw new ApiError(status.NOT_FOUND, "Permission not found");
+      throw new apiError(status.NOT_FOUND, "Permission not found");
     }
 
     return permission;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 
@@ -56,7 +56,7 @@ const getPermissionById = async (permissionId) => {
  * @description Get all permissions from the database
  *
  * @return {Array} - An array of all permissions
- * @throws {ApiError} - If there are no permissions found or if there is an error during the retrieval
+ * @throws {apiError} - If there are no permissions found or if there is an error during the retrieval
  */
 
 const getAllPermissions = async () => {
@@ -64,12 +64,12 @@ const getAllPermissions = async () => {
     const permissions = await Permission.findAll();
 
     if (permissions.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No permissions found");
+      throw new apiError(status.NOT_FOUND, "No permissions found");
     }
 
     return permissions;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 
@@ -78,7 +78,7 @@ const getAllPermissions = async () => {
  *
  * @param {number} permissionId - The ID of the permission to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If the permission is not found or if there is an error during the deletion
+ * @throws {apiError} - If the permission is not found or if there is an error during the deletion
  */
 
 const deletePermission = async (permissionId) => {
@@ -88,14 +88,14 @@ const deletePermission = async (permissionId) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "Permission not found");
+      throw new apiError(status.NOT_FOUND, "Permission not found");
     }
 
     return {
       message: "Permission deleted successfully",
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 
@@ -105,7 +105,7 @@ const deletePermission = async (permissionId) => {
  * @param {string} role - The role to check
  * @param {string} permissionKey - The permission key to check
  * @return {boolean} - True if the role has the permission, otherwise throws an error
- * @throws {ApiError} - If the permission is not found or if there is an error during the check
+ * @throws {apiError} - If the permission is not found or if there is an error during the check
  */
 
 const checkPermission = async (role, permissionKey) => {
@@ -118,12 +118,12 @@ const checkPermission = async (role, permissionKey) => {
     });
 
     if (!permission) {
-      throw new ApiError(status.FORBIDDEN, "Permission denied");
+      throw new apiError(status.FORBIDDEN, "Permission denied");
     }
 
     return true; 
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 

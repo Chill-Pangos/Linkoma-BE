@@ -1,6 +1,6 @@
 const ServiceRegistration = require("../models/serviceRegistration.model");
 const serviceRegistrationFieldConfig = require("../config/fieldConfig/serviceRegistration.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -9,7 +9,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * @param {Object} serviceRegistrationData - The service registration data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  * */
 
 const createServiceRegistration = async (serviceRegistrationData) => {
@@ -22,13 +22,13 @@ const createServiceRegistration = async (serviceRegistrationData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const result = await ServiceRegistration.create(fields);
 
     if (!result) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Service registration creation failed"
       );
@@ -39,7 +39,7 @@ const createServiceRegistration = async (serviceRegistrationData) => {
       serviceRegistrationId: result.serviceRegistrationID,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -47,13 +47,13 @@ const createServiceRegistration = async (serviceRegistrationData) => {
  * @description Get a service registration by ID
  * @param {number} serviceRegistrationId - The ID of the service registration to be retrieved
  * @return {Object} - The service registration data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getServiceRegistrationById = async (serviceRegistrationId) => {
   try {
     if (!serviceRegistrationId) {
-      throw new ApiError(
+      throw new apiError(
         status.BAD_REQUEST,
         "Service registration ID is required"
       );
@@ -62,12 +62,12 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
     const serviceRegistration = await ServiceRegistration.findByPk(serviceRegistrationId);
 
     if (!serviceRegistration) {
-      throw new ApiError(status.NOT_FOUND, "Service registration not found");
+      throw new apiError(status.NOT_FOUND, "Service registration not found");
     }
 
     return serviceRegistration;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -75,13 +75,13 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
  * @description Get all service registrations of an apartment
  * @param {number} apartmentId - The ID of the apartment whose service registrations are to be retrieved
  * @return {Array} - An array of service registrations
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getServiceRegistrationByApartmentId = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
     }
 
     const serviceRegistrations = await ServiceRegistration.findAll({
@@ -89,12 +89,12 @@ const getServiceRegistrationByApartmentId = async (apartmentId) => {
     });
 
     if (serviceRegistrations.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "Service registration not found");
+      throw new apiError(status.NOT_FOUND, "Service registration not found");
     }
 
     return serviceRegistrations;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -103,7 +103,7 @@ const getServiceRegistrationByApartmentId = async (apartmentId) => {
  * @param {number} serviceRegistrationId - The ID of the service registration to be updated
  * @param {Object} serviceRegistrationData - The updated service registration data
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  * */
 
 const updateServiceRegistration = async (
@@ -112,7 +112,7 @@ const updateServiceRegistration = async (
 ) => {
   try {
     if (!serviceRegistrationId) {
-      throw new ApiError(
+      throw new apiError(
         status.BAD_REQUEST,
         "Service registration ID is required"
       );
@@ -126,7 +126,7 @@ const updateServiceRegistration = async (
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await ServiceRegistration.update(fields, {
@@ -134,7 +134,7 @@ const updateServiceRegistration = async (
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.NOT_FOUND,
         "Service registration not found"
       );
@@ -145,7 +145,7 @@ const updateServiceRegistration = async (
       serviceRegistrationId: serviceRegistrationId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -153,13 +153,13 @@ const updateServiceRegistration = async (
  * @description Delete a service registration by ID
  * @param {number} serviceRegistrationId - The ID of the service registration to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  * */
 
 const deleteServiceRegistration = async (serviceRegistrationId) => {
   try {
     if (!serviceRegistrationId) {
-      throw new ApiError(
+      throw new apiError(
         status.BAD_REQUEST,
         "Service registration ID is required"
       );
@@ -170,14 +170,14 @@ const deleteServiceRegistration = async (serviceRegistrationId) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "Service registration not found");
+      throw new apiError(status.NOT_FOUND, "Service registration not found");
     }
 
     return {
       message: "Service registration deleted successfully",
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 

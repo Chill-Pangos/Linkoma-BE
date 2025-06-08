@@ -1,6 +1,6 @@
 const tokenService = require("../services/token.service");
 const { tokenTypes } = require("../config/tokens");
-const ApiError = require("../utils/ApiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const catchAsync = require("../utils/catchAsync");
 const permissionService = require("../services/permission.service");
@@ -10,7 +10,7 @@ const userService = require("../services/user.service");
  * @description Middleware to authenticate user based on access and refresh tokens.
  * @param {Array} requiredPermissions - Array of permissions required to access the resource.
  * @returns {Function} - Express middleware function.
- * @throws {ApiError} - Throws an error if authentication fails or permissions are insufficient.
+ * @throws {apiError} - Throws an error if authentication fails or permissions are insufficient.
  */
 
 const auth = (...requiredPermissions) =>
@@ -28,7 +28,7 @@ const auth = (...requiredPermissions) =>
         );
         user = await userService.getUserById(payload.userId);
 
-        if (!user) throw new ApiError(status.UNAUTHORIZED, "User not found");
+        if (!user) throw new apiError(status.UNAUTHORIZED, "User not found");
 
         req.user = user;
         await checkPermissions(user.role, requiredPermissions);
@@ -36,7 +36,7 @@ const auth = (...requiredPermissions) =>
       } catch (err) {
         if (err.name !== "TokenExpiredError") {
           return next(
-            new ApiError(status.UNAUTHORIZED, "Invalid access token")
+            new apiError(status.UNAUTHORIZED, "Invalid access token")
           );
         }
       }
@@ -50,11 +50,11 @@ const auth = (...requiredPermissions) =>
         );
 
         if (!payload?.userId) {
-          throw new ApiError(status.UNAUTHORIZED, "Invalid refresh token");
+          throw new apiError(status.UNAUTHORIZED, "Invalid refresh token");
         }
 
         user = await userService.getUserById(payload.userId);
-        if (!user) throw new ApiError(status.UNAUTHORIZED, "User not found");
+        if (!user) throw new apiError(status.UNAUTHORIZED, "User not found");
 
         const newAccessToken = await tokenService.generateAccessToken(user.id);
         res.setHeader("Authorization", `Bearer ${newAccessToken.accessToken}`);
@@ -63,11 +63,11 @@ const auth = (...requiredPermissions) =>
         await checkPermissions(user.role, requiredPermissions);
         return next();
       } catch (err) {
-        return next(new ApiError(status.UNAUTHORIZED, "Invalid refresh token"));
+        return next(new apiError(status.UNAUTHORIZED, "Invalid refresh token"));
       }
     }
 
-    return next(new ApiError(status.UNAUTHORIZED, "Please authenticate"));
+    return next(new apiError(status.UNAUTHORIZED, "Please authenticate"));
   });
 
 /**
@@ -80,7 +80,7 @@ const checkPermissions = async (role, requiredPermissions) => {
     requiredPermissions
   );
   if (!hasPermission) {
-    throw new ApiError(
+    throw new apiError(
       status.FORBIDDEN,
       "You do not have permission to access this resource"
     );

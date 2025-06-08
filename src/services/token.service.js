@@ -3,7 +3,7 @@ const day = require("dayjs");
 const { tokenTypes } = require("../config/tokens");
 const config = require("../config/config");
 const Token = require("../models/tokens.model");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const { ref } = require("joi");
 
@@ -14,7 +14,7 @@ const { ref } = require("joi");
  * @param {number} expires - The expiration time in minutes/days
  * @param {string} [secret=config.jwt.secret] - The secret key for signing the token
  * @return {Promise<string>} - The generated JWT token
- * @throws {ApiError} - If there is an error during token generation
+ * @throws {apiError} - If there is an error during token generation
  */
 
 const generateToken = async (
@@ -41,7 +41,7 @@ const generateToken = async (
  * @param {number} expires - The expiration time in minutes/days
  * @param {boolean} [revoked=false] - Whether the token is revoked
  * @return {Promise<Object>} - The saved token data
- * @throws {ApiError} - If there is an error during token saving
+ * @throws {apiError} - If there is an error during token saving
  */
 
 const saveToken = async (token, userId, type, expires, revoked = false) => {
@@ -56,7 +56,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
     const savedToken = await Token.create(tokenData);
 
     if (!savedToken) {
-      throw new ApiError(status.INTERNAL_SERVER_ERROR, "Token not saved");
+      throw new apiError(status.INTERNAL_SERVER_ERROR, "Token not saved");
     }
 
     return {
@@ -68,7 +68,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
       revoked,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -78,7 +78,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
  * @param {string} type - The expected type of the token (e.g., access, refresh)
  * @param {string} [secret=config.jwt.secret] - The secret key for verifying the token
  * @return {Promise<Object>} - The payload of the verified token
- * @throws {ApiError} - If the token is invalid or expired
+ * @throws {apiError} - If the token is invalid or expired
  */
 
 const verifyToken = async (token, type, secret = config.jwt.secret) => {
@@ -87,11 +87,11 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
   try {
     payload = jwt.verify(token, secret);
   } catch (error) {
-    throw new ApiError(status.UNAUTHORIZED, "Invalid or expired token");
+    throw new apiError(status.UNAUTHORIZED, "Invalid or expired token");
   }
 
   if (payload.type !== type) {
-    throw new ApiError(status.UNAUTHORIZED, "Invalid token type");
+    throw new apiError(status.UNAUTHORIZED, "Invalid token type");
   }
 
   if (payload.type === tokenTypes.REFRESH) {
@@ -105,12 +105,12 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
       });
 
       if (!tokenRecord || new Date() > tokenRecord.expires) {
-        throw new ApiError(status.UNAUTHORIZED, "Token not found or invalid");
+        throw new apiError(status.UNAUTHORIZED, "Token not found or invalid");
       }
 
       return tokenRecord;
     } catch (error) {
-      throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+      throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
     }
   }
 
@@ -125,7 +125,7 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
  * @description Generates access and refresh tokens for a user
  * @param {number} userId - The ID of the user
  * @return {Promise<Object>} - An object containing access and refresh tokens with their expiration dates
- * @throws {ApiError} - If there is an error during token generation
+ * @throws {apiError} - If there is an error during token generation
  */
 
 const generateAuthTokens = async (userId) => {
@@ -175,7 +175,7 @@ const generateAuthTokens = async (userId) => {
  * @param {string} type - The type of token (e.g., access, refresh)
  * @param {number} userId - The ID of the user associated with the token
  * @return {Promise<Object>} - A message indicating the success of the revocation
- * @throws {ApiError} - If there is an error during token revocation
+ * @throws {apiError} - If there is an error during token revocation
  */
 
 const revokeToken = async (token, userId) => {
@@ -191,7 +191,7 @@ const revokeToken = async (token, userId) => {
     );
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.NOT_FOUND,
         "Token not found or already revoked"
       );
@@ -199,7 +199,7 @@ const revokeToken = async (token, userId) => {
 
     return { message: "Token revoked successfully" };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -207,7 +207,7 @@ const revokeToken = async (token, userId) => {
  * @description Revokes all tokens for a specific user
  * @param {number} userId - The ID of the user whose tokens are to be revoked
  * @return {Promise<Object>} - A message indicating the success of the revocation
- * @throws {ApiError} - If there is an error during token revocation
+ * @throws {apiError} - If there is an error during token revocation
  */
 
 const revokeAllTokens = async (userId) => {
@@ -222,12 +222,12 @@ const revokeAllTokens = async (userId) => {
     );
 
     if (affectedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "No tokens found for this user");
+      throw new apiError(status.NOT_FOUND, "No tokens found for this user");
     }
 
     return { message: "All tokens revoked successfully" };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -235,14 +235,14 @@ const revokeAllTokens = async (userId) => {
  * @description Refreshes the access token using a valid refresh token
  * @param {string} refreshToken - The refresh token to be used for generating a new access token
  * @return {Promise<Object>} - An object containing the new access and refresh tokens with their expiration dates
- * @throws {ApiError} - If the refresh token is invalid or not found
+ * @throws {apiError} - If the refresh token is invalid or not found
  */
 
 const refreshAuthToken = async (refreshToken) => {
   const tokenData = await verifyToken(refreshToken, tokenTypes.REFRESH);
 
   if (!tokenData) {
-    throw new ApiError(status.UNAUTHORIZED, "Invalid refresh token");
+    throw new apiError(status.UNAUTHORIZED, "Invalid refresh token");
   }
 
   const userId = tokenData.userID;
@@ -256,7 +256,7 @@ const refreshAuthToken = async (refreshToken) => {
  * @description Generates a reset password token for a user
  * @param {number} userId - The ID of the user
  * @return {Promise<Object>} - An object containing the reset password token and its expiration date
- * @throws {ApiError} - If there is an error during token generation
+ * @throws {apiError} - If there is an error during token generation
  */
 
 const resetPasswordToken = async (userId) => {
@@ -281,7 +281,7 @@ const resetPasswordToken = async (userId) => {
  * @description Generates an access token for a user
  * @param {number} userId - The ID of the user
  * @return {Promise<Object>} - An object containing the access token and its expiration date
- * @throws {ApiError} - If there is an error during token generation
+ * @throws {apiError} - If there is an error during token generation
  */
 
 const generateAccessToken = async (userId) => {

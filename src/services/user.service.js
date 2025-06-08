@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const userFieldConfig = require("../config/fieldConfig/user.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 const bcrypt = require("bcryptjs");
@@ -10,7 +10,7 @@ const bcrypt = require("bcryptjs");
  *
  * @param {Object} userData - The user data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  */
 
 const createUser = async (userData) => {
@@ -28,18 +28,18 @@ const createUser = async (userData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const user = await User.create(fields);
 
     if (!user) {
-      throw new ApiError(status.INTERNAL_SERVER_ERROR, "User creation failed");
+      throw new apiError(status.INTERNAL_SERVER_ERROR, "User creation failed");
     }
 
     return { message: "User created successfully", userId: user.userId };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -48,24 +48,24 @@ const createUser = async (userData) => {
  *
  * @param {number} userId - The ID of the user to be retrieved
  * @return {Object} - The user data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  */
 
 const getUserById = async (userId) => {
   try {
     if (!userId) {
-      throw new ApiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const user = await User.findByPk(userId);
     
     if (!user) {
-      throw new ApiError(status.NOT_FOUND, "User not found");
+      throw new apiError(status.NOT_FOUND, "User not found");
     }
 
     return user;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -75,7 +75,7 @@ const getUserById = async (userId) => {
  * @param {number} limit - The number of users to retrieve
  * @param {number} offset - The offset for pagination
  * @return {Array} - The list of users
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  */
 
 const getUsers = async (limit, offset) => {
@@ -87,7 +87,7 @@ const getUsers = async (limit, offset) => {
     });
 
     if (users.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No users found");
+      throw new apiError(status.NOT_FOUND, "No users found");
     }
 
     const totalCount = await User.count();
@@ -98,7 +98,7 @@ const getUsers = async (limit, offset) => {
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -108,13 +108,13 @@ const getUsers = async (limit, offset) => {
  * @param {number} userId - The ID of the user to be updated
  * @param {Object} userData  - The user data to be updated
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  */
 
 const updateUser = async (userId, userData) => {
   try {
     if (!userId) {
-      throw new ApiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -130,7 +130,7 @@ const updateUser = async (userId, userData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await User.update(fields, {
@@ -138,12 +138,12 @@ const updateUser = async (userId, userData) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(status.INTERNAL_SERVER_ERROR, "User update failed");
+      throw new apiError(status.INTERNAL_SERVER_ERROR, "User update failed");
     }
 
     return { message: "User updated successfully", userId: userId };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -152,13 +152,13 @@ const updateUser = async (userId, userData) => {
  *
  * @param {number} userId - The ID of the user to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  */
 
 const deleteUser = async (userId) => {
   try {
     if (!userId) {
-      throw new ApiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const deletedRows = await User.destroy({
@@ -166,12 +166,12 @@ const deleteUser = async (userId) => {
     });
 
     if (deletedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "User not found");
+      throw new apiError(status.NOT_FOUND, "User not found");
     }
 
     return { message: "User deleted successfully" };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -180,13 +180,13 @@ const deleteUser = async (userId) => {
  *
  * @param {string} email - The email of the user to be retrieved
  * @return {Object} - The user data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  */
 
 const getUserByEmail = async (email) => {
   try {
     if(!email) {
-      throw new ApiError(status.BAD_REQUEST, "Email is required");
+      throw new apiError(status.BAD_REQUEST, "Email is required");
     }
 
     const user = await User.findOne({
@@ -194,12 +194,12 @@ const getUserByEmail = async (email) => {
     });
 
     if (!user) {
-      throw new ApiError(status.NOT_FOUND, "User not found");
+      throw new apiError(status.NOT_FOUND, "User not found");
     }
 
     return user;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 }
 
