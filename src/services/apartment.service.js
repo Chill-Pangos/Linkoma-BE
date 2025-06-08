@@ -1,6 +1,6 @@
 const Apartment = require("../models/apartment.model");
 const apartmentFieldConfig = require("../config/fieldConfig/apartment.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -8,7 +8,7 @@ const filterValidFields = require("../utils/filterValidFields");
  * @description Create a new apartment in the database
  * @param {Object} apartmentData - The apartment data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  *
  */
 
@@ -22,13 +22,13 @@ const createApartment = async (apartmentData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const apartment = await Apartment.create(fields);
 
     if (!apartment) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment creation failed"
       );
@@ -39,7 +39,7 @@ const createApartment = async (apartmentData) => {
       apartmentId: apartment.apartmentId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -47,25 +47,25 @@ const createApartment = async (apartmentData) => {
  * @description Get an apartment by ID
  * @param {number} apartmentId - The ID of the apartment to be retrieved
  * @return {Object} - The apartment data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  *
  */
 
 const getApartmentById = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
     }
 
     const apartment = await Apartment.findByPk(apartmentId);
 
     if (!apartment) {
-      throw new ApiError(status.NOT_FOUND, "Apartment not found");
+      throw new apiError(status.NOT_FOUND, "Apartment not found");
     }
 
     return apartment;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -74,7 +74,7 @@ const getApartmentById = async (apartmentId) => {
  * @param {number} apartmentId - The ID of the apartment to be updated
  * @param {Object} apartmentData - The apartment data to be updated
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  *
  */
 
@@ -87,7 +87,7 @@ const getApartments = async (limit, offset) => {
     });
 
     if (rows.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No apartments found");
+      throw new apiError(status.NOT_FOUND, "No apartments found");
     }
 
     return {
@@ -96,7 +96,7 @@ const getApartments = async (limit, offset) => {
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -105,14 +105,14 @@ const getApartments = async (limit, offset) => {
  * @param {number} apartmentId - The ID of the apartment to be updated
  * @param {Object} apartmentData - The apartment data to be updated
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  *
  */
 
 const updateApartment = async (apartmentId, apartmentData) => {
   try {
     if (!apartmentId) {
-      throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
     }
     const fields = filterValidFields.filterValidFieldsFromObject(
       apartmentData,
@@ -122,7 +122,7 @@ const updateApartment = async (apartmentId, apartmentData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await Apartment.update(fields, {
@@ -130,7 +130,7 @@ const updateApartment = async (apartmentId, apartmentData) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment update failed"
       );
@@ -141,7 +141,7 @@ const updateApartment = async (apartmentId, apartmentData) => {
       apartmentId: apartmentId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -149,14 +149,14 @@ const updateApartment = async (apartmentId, apartmentData) => {
  * @description Delete an apartment by ID
  * @param {number} apartmentId - The ID of the apartment to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  *
  */
 
 const deleteApartment = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new ApiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
     }
 
     const deletedRows = await Apartment.destroy({
@@ -164,7 +164,7 @@ const deleteApartment = async (apartmentId) => {
     });
 
     if (deletedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Apartment deletion failed"
       );
@@ -172,7 +172,7 @@ const deleteApartment = async (apartmentId) => {
 
     return { message: "Apartment deleted successfully" };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 

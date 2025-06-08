@@ -1,6 +1,6 @@
 const Feedback = require("../models/feedback.model");
 const feedbackFieldConfig = require("../config/fieldConfig/feedback.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -9,7 +9,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * @param {Object} feedbackData - The feedback data to be inserted
  * @return {Object} - The result of the insertion
- *  * @throws {ApiError} - If there is an error during the insertion
+ *  * @throws {apiError} - If there is an error during the insertion
  *  * */
 
 const createFeedback = async (feedbackData) => {
@@ -22,13 +22,13 @@ const createFeedback = async (feedbackData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const feedback = await Feedback.create(fields);
 
     if (!feedback) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Feedback creation failed"
       );
@@ -39,7 +39,7 @@ const createFeedback = async (feedbackData) => {
       feedbackId: feedback.feedbackId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -47,24 +47,24 @@ const createFeedback = async (feedbackData) => {
  * @description Get a feedback by ID
  * @param {number} feedbackId - The ID of the feedback to be retrieved
  * @return {Object} - The feedback data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getFeedbackById = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
     }
 
     const feedback = await Feedback.findByPk(feedbackId);
 
     if (!feedback) {
-      throw new ApiError(status.NOT_FOUND, "Feedback not found");
+      throw new apiError(status.NOT_FOUND, "Feedback not found");
     }
 
     return feedback;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -73,7 +73,7 @@ const getFeedbackById = async (feedbackId) => {
  * @param {number} limit - The number of feedbacks to retrieve
  * @param {number} offset - The offset for pagination
  * @return {Array} - The list of feedbacks
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getFeedbacks = async (limit, offset) => {
@@ -85,12 +85,12 @@ const getFeedbacks = async (limit, offset) => {
     });
 
     if (feedbacks.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No feedback found");
+      throw new apiError(status.NOT_FOUND, "No feedback found");
     }
 
     return feedbacks;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -99,13 +99,13 @@ const getFeedbacks = async (limit, offset) => {
  * @param {number} feedbackId - The ID of the feedback to be updated
  * @param {Object} feedbackData - The new feedback data
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  * */
 
 const updateFeedback = async (feedbackId, feedbackData) => {
   try {
     if (!feedbackId) {
-      throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -116,7 +116,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await Feedback.update(fields, {
@@ -124,7 +124,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Feedback update failed"
       );
@@ -135,7 +135,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
       feedbackId: feedbackId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -143,13 +143,13 @@ const updateFeedback = async (feedbackId, feedbackData) => {
  * @description Delete feedback by ID
  * @param {number} feedbackId - The ID of the feedback to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  * */
 
 const deleteFeedback = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new ApiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
     }
 
     const deletedRows = await Feedback.destroy({
@@ -157,7 +157,7 @@ const deleteFeedback = async (feedbackId) => {
     });
 
     if (deletedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "Feedback not found");
+      throw new apiError(status.NOT_FOUND, "Feedback not found");
     }
 
     return {
@@ -165,7 +165,7 @@ const deleteFeedback = async (feedbackId) => {
       feedbackId: feedbackId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 

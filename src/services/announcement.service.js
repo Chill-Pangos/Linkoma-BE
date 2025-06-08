@@ -1,6 +1,6 @@
 const Announcement = require("../models/announcement.model");
 const announcementFieldConfig = require("../config/fieldConfig/announcement.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -9,7 +9,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  *  @param {Object} announcementData - The announcement data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  *
  * */
 
@@ -23,13 +23,13 @@ const createAnnouncement = async (announcementData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const announcement = await Announcement.create(fields);
 
     if (!announcement) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Announcement creation failed"
       );
@@ -40,7 +40,7 @@ const createAnnouncement = async (announcementData) => {
       announcementId: announcement.announcementId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -49,25 +49,25 @@ const createAnnouncement = async (announcementData) => {
  *
  * @param {number} announcementId - The ID of the announcement to be retrieved
  * @return {Object} - The announcement data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  *
  * */
 
 const getAnnouncementById = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
     }
 
     const announcement = await Announcement.findByPk(announcementId);
 
     if (!announcement) {
-      throw new ApiError(status.NOT_FOUND, "Announcement not found");
+      throw new apiError(status.NOT_FOUND, "Announcement not found");
     }
 
     return announcement;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -77,7 +77,7 @@ const getAnnouncementById = async (announcementId) => {
  * @param {number} limit - The number of announcements to retrieve
  * @param {number} offset - The offset for pagination
  * @return {Array} - An array of announcements
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  *
  */
 
@@ -91,12 +91,12 @@ const getAnnouncementById = async (announcementId) => {
     });
 
     if (announcements.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "No announcements found");
+      throw new apiError(status.NOT_FOUND, "No announcements found");
     }
 
     return announcements;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -106,14 +106,14 @@ const getAnnouncementById = async (announcementId) => {
  * @param {number} announcementId - The ID of the announcement to be updated
  * @param {Object} announcementData - The announcement data to be updated
  * @return {Object} - The result of the update
- * @throws {ApiError} - If there is an error during the update
+ * @throws {apiError} - If there is an error during the update
  *
  */
 
 const updateAnnouncement = async (announcementId, announcementData) => {
   try {
     if (!announcementId) {
-      throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -124,7 +124,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const [affectedRows] = await Announcement.update(fields, {
@@ -132,7 +132,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
     });
 
     if (affectedRows === 0) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Announcement update failed"
       );
@@ -143,7 +143,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
       announcementId: announcementId,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -152,14 +152,14 @@ const updateAnnouncement = async (announcementId, announcementData) => {
  *
  * @param {number} announcementId - The ID of the announcement to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  *
  */
 
 const deleteAnnouncement = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new ApiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
     }
 
     const deletedRows = await Announcement.destroy({
@@ -167,14 +167,14 @@ const deleteAnnouncement = async (announcementId) => {
     });
 
     if (deletedRows === 0) {
-      throw new ApiError(status.NOT_FOUND, "Announcement not found");
+      throw new apiError(status.NOT_FOUND, "Announcement not found");
     }
 
     return {
       message: "Announcement deleted successfully",
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 

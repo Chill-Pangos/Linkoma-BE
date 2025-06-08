@@ -1,12 +1,12 @@
 const Joi = require("joi");
-const ApiError = require("../utils/ApiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 
 /**
  * @description Middleware to validate request data against a Joi schema.
  * @param {Object} schema - The Joi schema to validate against.
  * @returns {Function} - Express middleware function.
- * @throws {ApiError} - Throws an error if validation fails.
+ * @throws {apiError} - Throws an error if validation fails.
  */
 
 const validate = (schema) => (req, res, next) => {
@@ -23,7 +23,7 @@ const validate = (schema) => (req, res, next) => {
         const message = error.details
           .map((detail) => detail.message)
           .join(", ");
-        return next(new ApiError(status.BAD_REQUEST, message));
+        return next(new apiError(status.BAD_REQUEST, message));
       }
     }
   }

@@ -1,6 +1,6 @@
 const InvoiceDetail = require("../models/invoiceDetail.model");
 const invoiceDetailFieldConfig = require("../config/fieldConfig/invoiceDetail.fieldconfig");
-const ApiError = require("../utils/apiError");
+const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -9,7 +9,7 @@ const filterValidFields = require("../utils/filterValidFields");
  *
  * @param {Object} invoiceDetailData - The invoice detail data to be inserted
  * @return {Object} - The result of the insertion
- * @throws {ApiError} - If there is an error during the insertion
+ * @throws {apiError} - If there is an error during the insertion
  * */
 
 const createInvoiceDetail = async (invoiceDetailData) => {
@@ -22,13 +22,13 @@ const createInvoiceDetail = async (invoiceDetailData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
     }
 
     const result = await InvoiceDetail.create(fields);
 
     if (!result) {
-      throw new ApiError(
+      throw new apiError(
         status.INTERNAL_SERVER_ERROR,
         "Invoice detail creation failed"
       );
@@ -39,7 +39,7 @@ const createInvoiceDetail = async (invoiceDetailData) => {
       invoiceDetailId: result.invoiceDetailID,
     };
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -47,7 +47,7 @@ const createInvoiceDetail = async (invoiceDetailData) => {
  * @description Get an invoice detail by ID
  * @param {number} invoiceDetailId - The ID of the invoice detail to be retrieved
  * @return {Object} - The invoice detail data
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getInvoiceDetailById = async (invoiceDetailId) => {
@@ -55,12 +55,12 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
     const invoiceDetail = await InvoiceDetail.findByPk(invoiceDetailId);
 
     if (!invoiceDetail) {
-      throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
+      throw new apiError(status.NOT_FOUND, "Invoice detail not found");
     }
 
     return invoiceDetail;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
@@ -69,13 +69,13 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
  *
  * @param {number} invoiceId - The ID of the invoice to get details for
  * @return {Array} - An array of all invoice details
- * @throws {ApiError} - If there is an error during the retrieval
+ * @throws {apiError} - If there is an error during the retrieval
  * */
 
 const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new ApiError(status.BAD_REQUEST, "Invoice ID is required");
+      throw new apiError(status.BAD_REQUEST, "Invoice ID is required");
     }
 
     const invoiceDetails = await InvoiceDetail.findAll({
@@ -83,19 +83,19 @@ const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
     });
 
     if (invoiceDetails.length === 0) {
-      throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
+      throw new apiError(status.NOT_FOUND, "Invoice detail not found");
     }
 
     return invoiceDetails;
   } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
 const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
     try {
         if (!invoiceDetailId) {
-        throw new ApiError(status.BAD_REQUEST, "Invoice detail ID is required");
+        throw new apiError(status.BAD_REQUEST, "Invoice detail ID is required");
         }
 
         const fields = filterValidFields.filterValidFieldsFromObject(
@@ -106,7 +106,7 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         const entries = Object.entries(fields);
     
         if (entries.length === 0) {
-        throw new ApiError(status.BAD_REQUEST, "No valid fields provided");
+        throw new apiError(status.BAD_REQUEST, "No valid fields provided");
         }
     
         const [affectedRows] = await InvoiceDetail.update(fields, {
@@ -114,14 +114,14 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         });
     
         if (affectedRows === 0) {
-        throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
+        throw new apiError(status.NOT_FOUND, "Invoice detail not found");
         }
     
         return {
         message: "Invoice detail updated successfully",
         };
     } catch (error) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
     }
 }
 
@@ -129,13 +129,13 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
  * @description Delete an invoice detail by ID
  * @param {number} invoiceDetailId - The ID of the invoice detail to be deleted
  * @return {Object} - The result of the deletion
- * @throws {ApiError} - If there is an error during the deletion
+ * @throws {apiError} - If there is an error during the deletion
  * */
 
 const deleteInvoiceDetail = async (invoiceDetailId) => {
     try {
         if (!invoiceDetailId) {
-        throw new ApiError(status.BAD_REQUEST, "Invoice detail ID is required");
+        throw new apiError(status.BAD_REQUEST, "Invoice detail ID is required");
         }
     
         const affectedRows = await InvoiceDetail.destroy({
@@ -143,14 +143,14 @@ const deleteInvoiceDetail = async (invoiceDetailId) => {
         });
     
         if (affectedRows === 0) {
-        throw new ApiError(status.NOT_FOUND, "Invoice detail not found");
+        throw new apiError(status.NOT_FOUND, "Invoice detail not found");
         }
     
         return {
         message: "Invoice detail deleted successfully",
         };
     } catch (error) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
     }
 }
 
