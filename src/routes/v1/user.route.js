@@ -3,17 +3,40 @@ const auth = require('../../middlewares/auth.middleware');
 const validate = require('../../middlewares/validate.middleware');
 const userValidation = require('../../validations/user.validation');
 const userController = require('../../controllers/user.controller');
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
+
+// Rate limiting for user management operations
+const userLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    statusCode: 429,
+    message: "Too many user requests, please try again later.",
+  },
+});
+
+// Stricter rate limiting for user creation
+const createUserLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 10, // Limit each IP to 10 user creations per windowMs
+  message: {
+    statusCode: 429,
+    message: "Too many user creation requests, please try again later.",
+  },
+});
 
 router
   .route('/')
   .post(
+    createUserLimiter,
     auth('manageUsers'),
     validate(userValidation.createUser), 
     userController.createUser
   )
   .get(
+    userLimiter,
     auth('getUsers'),
     validate(userValidation.getUsers), 
     userController.getUsers
@@ -22,6 +45,7 @@ router
 router
   .route('/create-with-email')
   .post(
+    createUserLimiter,
     auth('manageUsers'),
     validate(userValidation.createUserWithEmail),
     userController.createUserWithEmail
@@ -30,6 +54,7 @@ router
 router
   .route('/email/:email')
   .get(
+    userLimiter,
     auth('getUsers'),
     validate(userValidation.getUserByEmail),
     userController.getUserByEmail
@@ -38,16 +63,19 @@ router
 router
   .route('/:userId')
   .get(
+    userLimiter,
     auth('getUsers'),
     validate(userValidation.getUser), 
     userController.getUser
   )
   .patch(
+    userLimiter,
     auth('manageUsers'),
     validate(userValidation.updateUser), 
     userController.updateUser
   )
   .delete(
+    userLimiter,
     auth('manageUsers'),
     validate(userValidation.deleteUser), 
     userController.deleteUser

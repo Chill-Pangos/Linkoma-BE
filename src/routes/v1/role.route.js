@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const auth = require('../../middlewares/auth.middleware');
 const validate = require('../../middlewares/validate.middleware');
 const roleValidation = require('../../validations/role.validation');
@@ -6,9 +7,31 @@ const roleController = require('../../controllers/role.controller');
 
 const router = express.Router();
 
+// Rate limiting for role management operations
+const roleGeneralLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many role requests from this IP, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const roleModificationLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes  
+  max: 20, // Limit each IP to 20 role modifications per windowMs
+  message: {
+    error: 'Too many role modification requests from this IP, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 router
   .route('/')
   .get(
+    roleGeneralLimiter,
     auth('systemConfig'),
     roleController.getAllRoles
   );
@@ -16,6 +39,7 @@ router
 router
   .route('/:role/permissions')
   .get(
+    roleGeneralLimiter,
     auth('systemConfig'),
     validate(roleValidation.getRolePermissions),
     roleController.getRolePermissions
@@ -24,6 +48,7 @@ router
 router
   .route('/:role/permissions/:permission')
   .get(
+    roleGeneralLimiter,
     auth('systemConfig'),
     validate(roleValidation.checkRolePermission),
     roleController.checkRolePermission
@@ -32,6 +57,7 @@ router
 router
   .route('/assign/:userId')
   .post(
+    roleModificationLimiter,
     auth('manageUsers'),
     validate(roleValidation.assignRoleToUser),
     roleController.assignRoleToUser
