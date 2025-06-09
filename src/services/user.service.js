@@ -238,19 +238,24 @@ const createUserWithEmail = async (email) => {
     const letterChars = 'abcdefghijklmnopqrstuvwxyz';
     const numberChars = '0123456789';
     
+    const getRandomIndex = (arrayLength) => {
+      const maxValid = Math.floor(256 / arrayLength) * arrayLength;
+      let randomByte;
+      do {
+        randomByte = crypto.randomBytes(1)[0];
+      } while (randomByte >= maxValid);
+      return randomByte % arrayLength;
+    };
+    
     let letters = '';
     let numbers = '';
     
-    // Generate 4 secure random letters
     for (let i = 0; i < 4; i++) {
-      const randomIndex = crypto.randomBytes(1)[0] % letterChars.length;
-      letters += letterChars[randomIndex];
+      letters += letterChars[getRandomIndex(letterChars.length)];
     }
     
-    // Generate 4 secure random numbers  
     for (let i = 0; i < 4; i++) {
-      const randomIndex = crypto.randomBytes(1)[0] % numberChars.length;
-      numbers += numberChars[randomIndex];
+      numbers += numberChars[getRandomIndex(numberChars.length)];
     }
     
     const password = letters + numbers;
