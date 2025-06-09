@@ -69,26 +69,48 @@ const getFeedbackById = async (feedbackId) => {
 };
 
 /**
- * @description Get feedbacks with pagination
- * @param {number} limit - The number of feedbacks to retrieve
- * @param {number} offset - The offset for pagination
- * @return {Array} - The list of feedbacks
+ * @description Get feedbacks with pagination and filters
+ * @param {number} limit - Number of items per page  
+ * @param {number} offset - Number of items to skip
+ * @param {Object} filters - Filter criteria {userId, category, status}
+ * @param {string} sortBy - Sort field and direction (e.g., 'createdAt:desc')
+ * @return {Object} - Paginated feedbacks with metadata
  * @throws {apiError} - If there is an error during the retrieval
  * */
 
-const getFeedbacks = async (limit, offset) => {
+const getFeedbacks = async (limit = 10, offset = 0, filters = {}, sortBy = 'createdAt:desc') => {
   try {
-    const feedbacks = await Feedback.findAll({
-      limit: limit,
-      offset: offset,
-      order: [['createdAt', 'ASC']]
-    });
-
-    if (feedbacks.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No feedback found");
+    
+    // Build where clause from filters
+    const where = {};
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.category) where.category = filters.category;
+    if (filters.status) where.status = filters.status;
+    
+    // Parse sortBy (e.g., 'createdAt:desc' -> ['createdAt', 'DESC'])
+    let order = [['createdAt', 'DESC']];
+    if (sortBy) {
+      const [field, direction = 'ASC'] = sortBy.split(':');
+      order = [[field, direction.toUpperCase()]];
     }
 
-    return feedbacks;
+    const { count, rows: feedbacks } = await Feedback.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order
+    });
+
+    const totalPages = Math.ceil(count / limit);
+    const currentPage = Math.floor(offset / limit) + 1;
+
+    return {
+      results: feedbacks,
+      totalResults: count,
+      totalPages,
+      page: currentPage,
+      limit: parseInt(limit)
+    };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }

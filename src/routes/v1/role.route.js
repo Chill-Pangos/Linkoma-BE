@@ -114,7 +114,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *           enum: [user, resident, manager, admin]
+ *           enum: [resident, manager, admin]
  *         description: Role name
  *     responses:
  *       "200":
