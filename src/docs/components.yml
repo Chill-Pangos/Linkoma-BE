@@ -61,7 +61,7 @@ components:
           type: string
           enum:
             - admin
-            - employee
+            - manager
             - resident
           example: "resident"
         createdAt:
