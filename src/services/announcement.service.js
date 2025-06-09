@@ -72,29 +72,47 @@ const getAnnouncementById = async (announcementId) => {
 };
 
 /**
- * @description Get all announcements with pagination
+ * @description Get all announcements with pagination and filtering
  *
  * @param {number} limit - The number of announcements to retrieve
  * @param {number} offset - The offset for pagination
- * @return {Array} - An array of announcements
+ * @param {Object} filters - Filtering options (type, priority, author)
+ * @param {string} sortBy - Sort criteria in format "field:direction"
+ * @return {Object} - Object containing announcements and pagination info
  * @throws {apiError} - If there is an error during the retrieval
  *
  */
 
-  const getAnnouncements = async (limit, offset) => {
-    try {
-      const announcements = await Announcement.findAll({
-      order: [["createdAt", "DESC"]],
-        
+const getAnnouncements = async (limit, offset, filters = {}, sortBy = 'createdAt:desc') => {
+  try {
+    const where = {};
+    
+    // Apply filters
+    if (filters.type) {
+      where.type = filters.type;
+    }
+    if (filters.priority) {
+      where.priority = filters.priority;
+    }
+    if (filters.author) {
+      where.author = filters.author;
+    }
+
+    // Parse sort criteria
+    const [sortField, sortDirection] = sortBy.split(':');
+    const order = [[sortField || 'createdAt', sortDirection?.toUpperCase() || 'DESC']];
+
+    const { count, rows } = await Announcement.findAndCountAll({
+      where,
+      order,
       limit: limit,
       offset: offset,
     });
 
-    if (announcements.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No announcements found");
-    }
-
-    return announcements;
+    return {
+      results: rows,
+      totalResults: count,
+    };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
