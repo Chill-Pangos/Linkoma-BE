@@ -234,9 +234,25 @@ const createUserWithEmail = async (email) => {
       );
     }
 
-    // Generate simple password: 4 random letters + 4 random numbers
-    const letters = Math.random().toString(36).substring(2, 6);
-    const numbers = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    // Generate cryptographically secure password: 4 letters + 4 numbers
+    const letterChars = 'abcdefghijklmnopqrstuvwxyz';
+    const numberChars = '0123456789';
+    
+    let letters = '';
+    let numbers = '';
+    
+    // Generate 4 secure random letters
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = crypto.randomBytes(1)[0] % letterChars.length;
+      letters += letterChars[randomIndex];
+    }
+    
+    // Generate 4 secure random numbers  
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = crypto.randomBytes(1)[0] % numberChars.length;
+      numbers += numberChars[randomIndex];
+    }
+    
     const password = letters + numbers;
 
     return await createUser({ email, password });
