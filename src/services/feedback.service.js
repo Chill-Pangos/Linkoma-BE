@@ -44,8 +44,8 @@ const createFeedback = async (feedbackData) => {
 };
 
 /**
- * @description Get a feedback by ID
- * @param {number} feedbackId - The ID of the feedback to be retrieved
+ * @description Get a feedback by Id
+ * @param {number} feedbackId - The Id of the feedback to be retrieved
  * @return {Object} - The feedback data
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -53,7 +53,7 @@ const createFeedback = async (feedbackData) => {
 const getFeedbackById = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
     }
 
     const feedback = await Feedback.findByPk(feedbackId);
@@ -95,8 +95,8 @@ const getFeedbacks = async (limit, offset) => {
 };
 
 /**
- * @description Update feedback by ID
- * @param {number} feedbackId - The ID of the feedback to be updated
+ * @description Update feedback by Id
+ * @param {number} feedbackId - The Id of the feedback to be updated
  * @param {Object} feedbackData - The new feedback data
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -105,7 +105,7 @@ const getFeedbacks = async (limit, offset) => {
 const updateFeedback = async (feedbackId, feedbackData) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -140,8 +140,8 @@ const updateFeedback = async (feedbackId, feedbackData) => {
 };
 
 /**
- * @description Delete feedback by ID
- * @param {number} feedbackId - The ID of the feedback to be deleted
+ * @description Delete feedback by Id
+ * @param {number} feedbackId - The Id of the feedback to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -149,7 +149,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
 const deleteFeedback = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback ID is required");
+      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
     }
 
     const deletedRows = await Feedback.destroy({

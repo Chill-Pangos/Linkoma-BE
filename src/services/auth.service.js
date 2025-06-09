@@ -37,7 +37,7 @@ const login = async (email, password) => {
 
     return {
       user: user,
-      ...(await tokenService.generateAuthTokens(user.userID)),
+      ...(await tokenService.generateAuthTokens(user.userId)),
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -61,7 +61,7 @@ const logout = async (refreshToken) => {
 
     await tokenService.revokeToken(
       refreshToken,
-      tokenData.userID
+      tokenData.userId
     );
 
     return { message: "Logged out successfully" };
@@ -90,7 +90,7 @@ const forgotPassword = async (email) => {
       throw new apiError(status.NOT_FOUND, "User not found");
     }
 
-    return await tokenService.resetPasswordToken(user.userID);
+    return await tokenService.resetPasswordToken(user.userId);
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
@@ -123,7 +123,7 @@ const resetPassword = async (resetToken, password) => {
       throw new apiError(status.UNAUTHORIZED, "Invalid reset token");
     }
 
-    const user = await userService.getUserById(tokenData.userID);
+    const user = await userService.getUserById(tokenData.userId);
 
     if (!user) {
       throw new apiError(status.NOT_FOUND, "User not found");
@@ -131,7 +131,7 @@ const resetPassword = async (resetToken, password) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    await userService.updateUser(user.userID, { password: hashedPassword });
+    await userService.updateUser(user.userId, { password: hashedPassword });
 
     return { message: "Password reset successfully" };
   } catch (error) {

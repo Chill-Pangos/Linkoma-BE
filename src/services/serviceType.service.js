@@ -36,7 +36,7 @@ const createServiceType = async (serviceTypeData) => {
 
     return {
       message: "Service type created successfully",
-      serviceTypeId: result.serviceTypeID,
+      serviceTypeId: result.serviceTypeId,
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -44,8 +44,8 @@ const createServiceType = async (serviceTypeData) => {
 };
 
 /**
- * @description Get a service type by ID
- * @param {number} serviceTypeId - The ID of the service type to be retrieved
+ * @description Get a service type by Id
+ * @param {number} serviceTypeId - The Id of the service type to be retrieved
  * @return {Object} - The service type data
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -53,7 +53,7 @@ const createServiceType = async (serviceTypeData) => {
 const getServiceTypeById = async (serviceTypeId) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type ID is required");
+      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
     }
 
     const serviceType = await ServiceType.findByPk(serviceTypeId);
@@ -82,7 +82,7 @@ const getServiceTypes = async (limit, offset) => {
     const serviceTypes = await ServiceType.findAll({
       limit: limit,
       offset: offset,
-      order: [['serviceTypeID', 'ASC']]
+      order: [['serviceTypeId', 'ASC']]
     });
 
     if (serviceTypes.length === 0) {
@@ -96,8 +96,8 @@ const getServiceTypes = async (limit, offset) => {
 };
 
 /**
- * @description Delete a service type by ID
- * @param {number} serviceTypeId - The ID of the service type to be deleted
+ * @description Delete a service type by Id
+ * @param {number} serviceTypeId - The Id of the service type to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -105,7 +105,7 @@ const getServiceTypes = async (limit, offset) => {
 const updateServiceType = async (serviceTypeId, serviceTypeData) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type ID is required");
+      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -120,7 +120,7 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
     }
 
     const [affectedRows] = await ServiceType.update(fields, {
-      where: { serviceTypeID: serviceTypeId }
+      where: { serviceTypeId: serviceTypeId }
     });
 
     if (affectedRows === 0) {
@@ -137,8 +137,8 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
 };
 
 /**
- * @description Delete a service type by ID
- * @param {number} serviceTypeId - The ID of the service type to be deleted
+ * @description Delete a service type by Id
+ * @param {number} serviceTypeId - The Id of the service type to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -146,11 +146,11 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
 const deleteServiceType = async (serviceTypeId) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type ID is required");
+      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
     }
 
     const affectedRows = await ServiceType.destroy({
-      where: { serviceTypeID: serviceTypeId }
+      where: { serviceTypeId: serviceTypeId }
     });
 
     if (affectedRows === 0) {

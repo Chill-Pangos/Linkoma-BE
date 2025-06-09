@@ -47,7 +47,7 @@ const isValidRole = (role) => {
 
 /**
  * @description Assign role to user (this would be done through a separate user-role mapping)
- * @param {number} userId - User ID
+ * @param {number} userId - User Id
  * @param {string} role - Role to assign
  * @returns {Object} Success message
  * @throws {apiError} If role doesn't exist

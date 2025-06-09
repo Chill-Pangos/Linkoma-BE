@@ -14,7 +14,7 @@ components:
     User:
       type: object
       properties:
-        userID:
+        userId:
           type: integer
           format: int32
           readOnly: true
@@ -37,7 +37,7 @@ components:
           format: email
           maxLength: 100
           example: "example@example.com"
-        citizenID:
+        citizenId:
           type: string
           maxLength: 20
           example: "012345678901"
@@ -48,7 +48,7 @@ components:
           type: string
           maxLength: 20
           example: "51A-12345"
-        apartmentID:
+        apartmentId:
           type: integer
           format: int32
           example: 101
@@ -82,7 +82,7 @@ components:
     Announcement:
       type: object
       properties:
-        announcementID:
+        announcementId:
           type: integer
           format: int32
           readOnly: true
@@ -128,12 +128,12 @@ components:
     Apartment:
       type: object
       properties:
-        apartmentID:
+        apartmentId:
           type: integer
           format: int32
           readOnly: true
           example: 101
-        apartmentTypeID:
+        apartmentTypeId:
           type: integer
           format: int32
           example: 1
@@ -158,14 +158,14 @@ components:
           readOnly: true
           example: "2025-06-03T10:30:00Z"
       required:
-        - apartmentTypeID
+        - apartmentTypeId
         - floor
         - status
 
     ApartmentType:
       type: object
       properties:
-        apartmentTypeID:
+        apartmentTypeId:
           type: integer
           format: int32
           readOnly: true
@@ -207,12 +207,12 @@ components:
     Contract:
       type: object
       properties:
-        contractID:
+        contractId:
           type: integer
           format: int32
           readOnly: true
           example: 1
-        apartmentID:
+        apartmentId:
           type: integer
           format: int32
           example: 101
@@ -236,12 +236,12 @@ components:
     Feedback:
       type: object
       properties:
-        feedbackID:
+        feedbackId:
           type: integer
           format: int32
           readOnly: true
           example: 1
-        userID:
+        userId:
           type: integer
           format: int32
           example: 101
@@ -274,19 +274,19 @@ components:
           readOnly: true
           example: "2025-06-02T10:00:00Z"
       required:
-        - userID
+        - userId
         - category
         - description
 
     Invoice:
       type: object
       properties:
-        invoiceID:
+        invoiceId:
           type: integer
           format: int32
           readOnly: true
           example: 1
-        apartmentID:
+        apartmentId:
           type: integer
           format: int32
           example: 101
@@ -317,7 +317,7 @@ components:
           readOnly: true
           example: "2025-06-01T10:00:00Z"
       required:
-        - apartmentID
+        - apartmentId
         - rentFee
         - serviceFee
         - dueDate
@@ -326,16 +326,16 @@ components:
     InvoiceDetail:
       type: object
       properties:
-        invoiceDetailID:
+        invoiceDetailId:
           type: integer
           format: int32
           readOnly: true
           example: 1
-        invoiceID:
+        invoiceId:
           type: integer
           format: int32
           example: 101
-        serviceTypeID:
+        serviceTypeId:
           type: integer
           format: int32
           example: 5
@@ -358,24 +358,24 @@ components:
           readOnly: true
           example: "2025-06-01T12:00:00Z"
       required:
-        - invoiceID
-        - serviceTypeID
+        - invoiceId
+        - serviceTypeId
         - usage
         - totalAmount
 
     ServiceRegistration:
       type: object
       properties:
-        serviceRegistrationID:
+        serviceRegistrationId:
           type: integer
           format: int32
           readOnly: true
           example: 1
-        apartmentID:
+        apartmentId:
           type: integer
           format: int32
           example: 101
-        serviceTypeID:
+        serviceTypeId:
           type: integer
           format: int32
           example: 5
@@ -405,15 +405,15 @@ components:
           readOnly: true
           example: "2025-06-10T15:00:00Z"
       required:
-        - apartmentID
-        - serviceTypeID
+        - apartmentId
+        - serviceTypeId
         - startDate
         - endDate
 
     ServiceType:
       type: object
       properties:
-        serviceTypeID:
+        serviceTypeId:
           type: integer
           format: int32
           readOnly: true
@@ -448,7 +448,7 @@ components:
     Permission:
       type: object
       properties:
-        permissionID:
+        permissionId:
           type: integer
           format: int32
           readOnly: true

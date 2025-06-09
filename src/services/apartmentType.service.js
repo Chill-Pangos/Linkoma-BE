@@ -36,7 +36,7 @@ const createApartmentType = async (apartmentTypeData) => {
 
     return {
       message: "Apartment type created successfully",
-      apartmentTypeId: result.apartmentTypeID,
+      apartmentTypeId: result.apartmentTypeId,
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -44,9 +44,9 @@ const createApartmentType = async (apartmentTypeData) => {
 };
 
 /**
- * @description Get an apartment type by ID
+ * @description Get an apartment type by Id
  *
- * @param {number} apartmentTypeId - The ID of the apartment type to be retrieved
+ * @param {number} apartmentTypeId - The Id of the apartment type to be retrieved
  * @return {Object} - The apartment type data
  * @throws {apiError} - If there is an error during the retrieval
  */
@@ -54,7 +54,7 @@ const createApartmentType = async (apartmentTypeData) => {
 const getApartmentTypeById = async (apartmentTypeId) => {
   try {
     if (!apartmentTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment type ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
     }
 
     const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
@@ -83,7 +83,7 @@ const getApartmentTypes = async (limit, offset) => {
     const apartmentTypes = await ApartmentType.findAll({
       limit: limit,
       offset: offset,
-      order: [['apartmentTypeID', 'ASC']]
+      order: [['apartmentTypeId', 'ASC']]
     });
 
     if (apartmentTypes.length === 0) {
@@ -105,7 +105,7 @@ const getApartmentTypes = async (limit, offset) => {
 /**
  * @description Get all apartment types
  *
- * @param {number} apartmentTypeId - The ID of the apartment type to be retrieved
+ * @param {number} apartmentTypeId - The Id of the apartment type to be retrieved
  * @param {Object} apartmentTypeData - The apartment type data to be updated
  * @return {Array} - The list of apartment types
  * @throws {apiError} - If there is an error during the retrieval
@@ -114,7 +114,7 @@ const getApartmentTypes = async (limit, offset) => {
 const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
   try {
     if (!apartmentTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment type ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -129,7 +129,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
     }
 
     const [affectedRows] = await ApartmentType.update(fields, {
-      where: { apartmentTypeID: apartmentTypeId }
+      where: { apartmentTypeId: apartmentTypeId }
     });
 
     if (affectedRows === 0) {
@@ -151,7 +151,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
 /**
  * @description Get all apartment types
  *
- * @param {number} apartmentTypeId - The ID of the apartment type to be retrieved
+ * @param {number} apartmentTypeId - The Id of the apartment type to be retrieved
  * @return {Array} - The list of apartment types
  * @throws {apiError} - If there is an error during the retrieval
  */
@@ -159,11 +159,11 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
 const deleteApartmentType = async (apartmentTypeId) => {
     try {
         if (!apartmentTypeId) {
-        throw new apiError(status.BAD_REQUEST, "Apartment type ID is required");
+        throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
         }
     
         const affectedRows = await ApartmentType.destroy({
-            where: { apartmentTypeID: apartmentTypeId }
+            where: { apartmentTypeId: apartmentTypeId }
         });
     
         if (affectedRows === 0) {
