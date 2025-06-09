@@ -145,9 +145,10 @@ components:
         status:
           type: string
           enum:
-            - Available
-            - Rented
-          example: "Available"
+            - available
+            - rented
+            - maintenance
+          example: "available"
         createdAt:
           type: string
           format: date-time
@@ -492,6 +493,39 @@ components:
           type: string
         statusCode:
           type: integer
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Number of items per page
+          example: 10
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          example: 5
+        totalResults:
+          type: integer
+          minimum: 0
+          description: Total number of results
+          example: 50
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page
+          example: true
+        hasPrevPage:
+          type: boolean
+          description: Whether there is a previous page
+          example: false
 
   responses:
     BadRequest:
