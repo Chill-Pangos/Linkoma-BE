@@ -1,7 +1,10 @@
 const InvoiceDetail = require("../models/invoiceDetail.model");
+const ServiceType = require("../models/serviceType.model");
+const Invoice = require("../models/invoice.model");
 const invoiceDetailFieldConfig = require("../config/fieldConfig/invoiceDetail.fieldconfig");
 const apiError = require("../utils/apiError");
 const { status } = require("http-status");
+const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -154,10 +157,77 @@ const deleteInvoiceDetail = async (invoiceDetailId) => {
     }
 }
 
+/**
+ * @description Query invoice details with filtering and pagination
+ * @param {Object} filter - Filter object
+ * @param {Object} options - Options object with sortBy, limit, page
+ * @return {Object} - Paginated invoice details with total count
+ * @throws {apiError} - If there is an error during the query
+ */
+const queryInvoiceDetails = async (filter, options) => {
+  try {
+    const { invoiceId, serviceTypeId, minUsage, maxUsage, minTotalAmount, maxTotalAmount } = filter;
+    const { sortBy, limit = 10, page = 1 } = options;
+
+    // Build where clause
+    const where = {};
+    if (invoiceId) where.invoiceId = invoiceId;
+    if (serviceTypeId) where.serviceTypeId = serviceTypeId;
+    if (minUsage || maxUsage) {
+      where.usage = {};
+      if (minUsage) where.usage[Op.gte] = minUsage;
+      if (maxUsage) where.usage[Op.lte] = maxUsage;
+    }
+    if (minTotalAmount || maxTotalAmount) {
+      where.totalAmount = {};
+      if (minTotalAmount) where.totalAmount[Op.gte] = minTotalAmount;
+      if (maxTotalAmount) where.totalAmount[Op.lte] = maxTotalAmount;
+    }
+
+    // Build order clause
+    let order = [];
+    if (sortBy) {
+      const [field, direction] = sortBy.split(':');
+      order = [[field, direction?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']];
+    } else {
+      order = [['createdAt', 'DESC']];
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await InvoiceDetail.findAndCountAll({
+      where,
+      order,
+      limit: parseInt(limit),
+      offset,
+      include: [{
+        model: ServiceType,
+        attributes: ['serviceName', 'unit', 'unitPrice']
+      }, {
+        model: Invoice,
+        attributes: ['invoiceId', 'apartmentId', 'status', 'dueDate']
+      }]
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      results: rows,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+      totalResults: count,
+    };
+  } catch (error) {
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 module.exports = {
   createInvoiceDetail,
   getInvoiceDetailById,
   getInvoiceDetailsByInvoiceId,
   updateInvoiceDetail,
   deleteInvoiceDetail,
+  queryInvoiceDetails,
 };
