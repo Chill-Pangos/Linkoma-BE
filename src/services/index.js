@@ -1,0 +1,14 @@
+module.exports.authService = require('./auth.service');
+module.exports.emailService = require('./email.service');
+module.exports.tokenService = require('./token.service');
+module.exports.userService = require('./user.service');
+module.exports.roleService = require('./role.service');
+module.exports.announcementService = require('./announcement.service');
+module.exports.apartmentService = require('./apartment.service');
+module.exports.apartmentTypeService = require('./apartmentType.service');
+module.exports.contractService = require('./contract.service');
+module.exports.feedbackService = require('./feedback.service');
+module.exports.invoiceService = require('./invoice.service');
+module.exports.invoiceDetailService = require('./invoiceDetail.service');
+module.exports.serviceRegistrationService = require('./serviceRegistration.service');
+module.exports.serviceTypeService = require('./serviceType.service');

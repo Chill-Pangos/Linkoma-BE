@@ -4,6 +4,8 @@ const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const emailService = require("./email.service");
 
 /**
  * @description Create a new user in the database
@@ -36,6 +38,11 @@ const createUser = async (userData) => {
     if (!user) {
       throw new apiError(status.INTERNAL_SERVER_ERROR, "User creation failed");
     }
+
+    await emailService.sendAccountEmail(
+      user.email,
+      fields.password
+    );
 
     return { message: "User created successfully", userId: user.userId };
   } catch (error) {
@@ -203,11 +210,39 @@ const getUserByEmail = async (email) => {
   }
 }
 
+/**
+ * @description Create a user with a random password if the email does not exist
+ *
+ * @param {string} email - The email of the user to be created
+ * @return {Object} - The result of the user creation
+ * @throws {apiError} - If there is an error during the creation
+ */
+
+const createUserWithEmail = async (email) => {
+  try {
+    const existingUser = await getUserByEmail(email);
+
+    if (existingUser) {
+      throw new apiError(
+        status.CONFLICT,
+        "User with this email already exists"
+      );
+    }
+
+    const password = crypto.randomBytes(6).toString("base64").slice(0, 8);
+
+    return await createUser({ email, password });
+  } catch (error) {
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 module.exports = {
   createUser,
   getUserById,
   getUsers,
   updateUser,
   deleteUser,
-  getUserByEmail
+  getUserByEmail,
+  createUserWithEmail
 };
