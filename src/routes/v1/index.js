@@ -7,6 +7,8 @@ const feedbackRoute = require("./feedback.route");
 const announcementRoute = require("./announcement.route");
 const apartmentRoute = require("./apartment.route");
 const apartmentTypeRoute = require("./apartmentType.route");
+const serviceTypeRoute = require("./serviceType.route");
+const serviceRegistrationRoute = require("./serviceRegistration.route");
 
 const router = express.Router();
 
@@ -42,6 +44,14 @@ const defaultRoutes = [
     {
         path: "/apartment-types",
         route: apartmentTypeRoute,
+    },
+    {
+        path: "/service-types",
+        route: serviceTypeRoute,
+    },
+    {
+        path: "/service-registrations",
+        route: serviceRegistrationRoute,
     }
 ];
 

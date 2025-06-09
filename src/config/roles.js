@@ -9,7 +9,9 @@ const allRoles = {
     'viewInvoices',
     'viewServices',
     'registerService',
-    'getApartments'
+    'getApartments',
+    'getServiceTypes',
+    'getServiceRegistrations'
   ],
   manager: [
     'getProfile',
@@ -23,6 +25,10 @@ const allRoles = {
     'manageServices',
     'manageApartments',
     'manageApartmentTypes',
+    'getServiceTypes',
+    'manageServiceTypes',
+    'getServiceRegistrations',
+    'manageServiceRegistrations',
     'viewReports'
   ],
   admin: [
@@ -38,6 +44,10 @@ const allRoles = {
     'manageServices',
     'manageApartments',
     'manageApartmentTypes',
+    'getServiceTypes',
+    'manageServiceTypes',
+    'getServiceRegistrations',
+    'manageServiceRegistrations',
     'managePermissions',
     'viewReports',
     'systemConfig'

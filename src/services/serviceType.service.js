@@ -2,6 +2,7 @@ const ServiceType = require("../models/serviceType.model");
 const serviceTypeFieldConfig = require("../config/fieldConfig/serviceType.fieldconfig");
 const apiError = require("../utils/apiError");
 const { status } = require("http-status");
+const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -166,10 +167,65 @@ const deleteServiceType = async (serviceTypeId) => {
   }
 };
 
+/**
+ * @description Query service types with filtering and pagination
+ * @param {Object} filter - Filter object with serviceName, unit, minUnitPrice, maxUnitPrice
+ * @param {Object} options - Options object with sortBy, limit, page
+ * @return {Object} - Paginated service types with total count
+ * @throws {apiError} - If there is an error during the query
+ */
+const queryServiceTypes = async (filter, options) => {
+  try {
+    const { serviceName, unit, minUnitPrice, maxUnitPrice } = filter;
+    const { sortBy, limit = 10, page = 1 } = options;
+
+    // Build where clause
+    const where = {};
+    if (serviceName) where.serviceName = { [Op.like]: `%${serviceName}%` };
+    if (unit) where.unit = { [Op.like]: `%${unit}%` };
+    if (minUnitPrice || maxUnitPrice) {
+      where.unitPrice = {};
+      if (minUnitPrice) where.unitPrice[Op.gte] = minUnitPrice;
+      if (maxUnitPrice) where.unitPrice[Op.lte] = maxUnitPrice;
+    }
+
+    // Build order clause
+    let order = [];
+    if (sortBy) {
+      const [field, direction] = sortBy.split(':');
+      order = [[field, direction?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']];
+    } else {
+      order = [['createdAt', 'DESC']];
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await ServiceType.findAndCountAll({
+      where,
+      order,
+      limit: parseInt(limit),
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      results: rows,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+      totalResults: count,
+    };
+  } catch (error) {
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 module.exports = {
   createServiceType,
   getServiceTypeById,
   getServiceTypes,
+  queryServiceTypes,
   updateServiceType,
   deleteServiceType,
 };
