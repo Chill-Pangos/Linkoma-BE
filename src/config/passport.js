@@ -1,14 +1,15 @@
 const passport = require("passport");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const { tokenTypes } = require("./tokens");
-const db = require("./database");
+const { User } = require("../models");
+const config = require("./config");
 
 const cookieExtractor = (req) => {
   return req.cookies?.token || null;
 };
 
 const jwtOptions = {
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: config.jwt.secret,
   jwtFromRequest: ExtractJwt.fromExtractors([
     ExtractJwt.fromAuthHeaderAsBearerToken(),
     cookieExtractor,
@@ -16,22 +17,21 @@ const jwtOptions = {
 };
 
 const jwtVerify = async (payload, done) => {
-  if (payload.type !== tokenTypes.ACCESS) {
-    return done(new Error("Invalid token type"), false);
+  try {
+    if (payload.type !== tokenTypes.ACCESS) {
+      return done(new Error("Invalid token type"), false);
+    }
+
+    const user = await User.findByPk(payload.sub);
+
+    if (!user) {
+      return done(new Error("User not found"), false);
+    }
+
+    return done(null, user);
+  } catch (error) {
+    return done(error, false);
   }
-
-  const connection = db.getConnection();
-
-  const [user] = await connection.execute(
-    "SELECT * FROM users WHERE userID = ?",
-    [payload.sub]
-  );
-
-  if (!user || user.length === 0) {
-    return done(new Error("User not found"), false);
-  }
-
-  return done(null, user[0]);
 };
 
 const jwtStrategy = new JwtStrategy(jwtOptions, jwtVerify);

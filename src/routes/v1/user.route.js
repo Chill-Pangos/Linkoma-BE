@@ -122,7 +122,7 @@ module.exports = router;
  *                 format: date
  *               phoneNumber:
  *                 type: string
- *               citizenID:
+ *               citizenId:
  *                 type: string
  *               address:
  *                 type: string
@@ -335,7 +335,7 @@ module.exports = router;
  *                 format: date
  *               phoneNumber:
  *                 type: string
- *               citizenID:
+ *               citizenId:
  *                 type: string
  *               address:
  *                 type: string

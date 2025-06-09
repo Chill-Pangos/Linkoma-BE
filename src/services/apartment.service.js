@@ -44,8 +44,8 @@ const createApartment = async (apartmentData) => {
 };
 
 /**
- * @description Get an apartment by ID
- * @param {number} apartmentId - The ID of the apartment to be retrieved
+ * @description Get an apartment by Id
+ * @param {number} apartmentId - The Id of the apartment to be retrieved
  * @return {Object} - The apartment data
  * @throws {apiError} - If there is an error during the retrieval
  *
@@ -54,7 +54,7 @@ const createApartment = async (apartmentData) => {
 const getApartmentById = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment Id is required");
     }
 
     const apartment = await Apartment.findByPk(apartmentId);
@@ -71,7 +71,7 @@ const getApartmentById = async (apartmentId) => {
 
 /**
  * @description Update an apartment in the database
- * @param {number} apartmentId - The ID of the apartment to be updated
+ * @param {number} apartmentId - The Id of the apartment to be updated
  * @param {Object} apartmentData - The apartment data to be updated
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -101,8 +101,8 @@ const getApartments = async (limit, offset) => {
 };
 
 /**
- * @description Update an apartment by ID
- * @param {number} apartmentId - The ID of the apartment to be updated
+ * @description Update an apartment by Id
+ * @param {number} apartmentId - The Id of the apartment to be updated
  * @param {Object} apartmentData - The apartment data to be updated
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -112,7 +112,7 @@ const getApartments = async (limit, offset) => {
 const updateApartment = async (apartmentId, apartmentData) => {
   try {
     if (!apartmentId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment Id is required");
     }
     const fields = filterValidFields.filterValidFieldsFromObject(
       apartmentData,
@@ -146,8 +146,8 @@ const updateApartment = async (apartmentId, apartmentData) => {
 };
 
 /**
- * @description Delete an apartment by ID
- * @param {number} apartmentId - The ID of the apartment to be deleted
+ * @description Delete an apartment by Id
+ * @param {number} apartmentId - The Id of the apartment to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  *
@@ -156,7 +156,7 @@ const updateApartment = async (apartmentId, apartmentData) => {
 const deleteApartment = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment Id is required");
     }
 
     const deletedRows = await Apartment.destroy({

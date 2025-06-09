@@ -153,7 +153,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: integer
- *         description: User ID
+ *         description: User Id
  *     requestBody:
  *       required: true
  *       content:

@@ -26,7 +26,7 @@ const User = db.define(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
-    citizenID: {
+    citizenId: {
       type: DataTypes.STRING(20),
       allowNull: true,
     },

@@ -45,8 +45,8 @@ const createContract = async (contractData) => {
 };
 
 /**
- * @description Get a contract by ID
- * @param {number} contractId - The ID of the contract to be retrieved
+ * @description Get a contract by Id
+ * @param {number} contractId - The Id of the contract to be retrieved
  * @return {Object} - The contract data
  * @throws {apiError} - If there is an error during the retrieval
  *
@@ -55,7 +55,7 @@ const createContract = async (contractData) => {
 const getContractById = async (contractId) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
     }
 
     const contract = await Contract.findByPk(contractId);
@@ -99,7 +99,7 @@ const getContracts = async (limit, offset) => {
 
 /**
  * @description Update a contract in the database
- * @param {number} contractId - The ID of the contract to be updated
+ * @param {number} contractId - The Id of the contract to be updated
  * @param {Object} contractData - The contract data to be updated
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -109,7 +109,7 @@ const getContracts = async (limit, offset) => {
 const updateContract = async (contractId, contractData) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
     }
     
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -144,8 +144,8 @@ const updateContract = async (contractId, contractData) => {
 };
 
 /**
- * @description Delete a contract by ID
- * @param {number} contractId - The ID of the contract to be deleted
+ * @description Delete a contract by Id
+ * @param {number} contractId - The Id of the contract to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  *
@@ -154,7 +154,7 @@ const updateContract = async (contractId, contractData) => {
 const deleteContract = async (contractId) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract ID is required");
+      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
     }
 
     const deletedRows = await Contract.destroy({

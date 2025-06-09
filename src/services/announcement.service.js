@@ -45,9 +45,9 @@ const createAnnouncement = async (announcementData) => {
 };
 
 /**
- * @description Get an announcement by ID
+ * @description Get an announcement by Id
  *
- * @param {number} announcementId - The ID of the announcement to be retrieved
+ * @param {number} announcementId - The Id of the announcement to be retrieved
  * @return {Object} - The announcement data
  * @throws {apiError} - If there is an error during the retrieval
  *
@@ -56,7 +56,7 @@ const createAnnouncement = async (announcementData) => {
 const getAnnouncementById = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
     }
 
     const announcement = await Announcement.findByPk(announcementId);
@@ -103,7 +103,7 @@ const getAnnouncementById = async (announcementId) => {
 /**
  * @description Update an announcement in the database
  *
- * @param {number} announcementId - The ID of the announcement to be updated
+ * @param {number} announcementId - The Id of the announcement to be updated
  * @param {Object} announcementData - The announcement data to be updated
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -113,7 +113,7 @@ const getAnnouncementById = async (announcementId) => {
 const updateAnnouncement = async (announcementId, announcementData) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -148,9 +148,9 @@ const updateAnnouncement = async (announcementId, announcementData) => {
 };
 
 /**
- * @description Delete an announcement by ID
+ * @description Delete an announcement by Id
  *
- * @param {number} announcementId - The ID of the announcement to be deleted
+ * @param {number} announcementId - The Id of the announcement to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  *
@@ -159,7 +159,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
 const deleteAnnouncement = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement ID is required");
+      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
     }
 
     const deletedRows = await Announcement.destroy({

@@ -9,7 +9,7 @@ const { ref } = require("joi");
 
 /**
  * @description Generates a JWT token for a user
- * @param {number} userId - The ID of the user
+ * @param {number} userId - The Id of the user
  * @param {string} type - The type of token (e.g., access, refresh)
  * @param {number} expires - The expiration time in minutes/days
  * @param {string} [secret=config.jwt.secret] - The secret key for signing the token
@@ -36,7 +36,7 @@ const generateToken = async (
 /**
  * @description Saves a token in the database
  * @param {string} token - The token to be saved
- * @param {number} userId - The ID of the user associated with the token
+ * @param {number} userId - The Id of the user associated with the token
  * @param {string} type - The type of token (e.g., access, refresh)
  * @param {number} expires - The expiration time in minutes/days
  * @param {boolean} [revoked=false] - Whether the token is revoked
@@ -48,7 +48,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
   try {
     const tokenData = {
       token,
-      userID: userId,
+      userId: userId,
       expires,
       revoked
     };
@@ -117,13 +117,13 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
   return {
     token: token,
     expires: payload.exp,
-    userID: payload.sub,
+    userId: payload.sub,
   };
 };
 
 /**
  * @description Generates access and refresh tokens for a user
- * @param {number} userId - The ID of the user
+ * @param {number} userId - The Id of the user
  * @return {Promise<Object>} - An object containing access and refresh tokens with their expiration dates
  * @throws {apiError} - If there is an error during token generation
  */
@@ -173,7 +173,7 @@ const generateAuthTokens = async (userId) => {
  * @description Revokes a specific token for a user
  * @param {string} token - The token to be revoked
  * @param {string} type - The type of token (e.g., access, refresh)
- * @param {number} userId - The ID of the user associated with the token
+ * @param {number} userId - The Id of the user associated with the token
  * @return {Promise<Object>} - A message indicating the success of the revocation
  * @throws {apiError} - If there is an error during token revocation
  */
@@ -205,7 +205,7 @@ const revokeToken = async (token, userId) => {
 
 /**
  * @description Revokes all tokens for a specific user
- * @param {number} userId - The ID of the user whose tokens are to be revoked
+ * @param {number} userId - The Id of the user whose tokens are to be revoked
  * @return {Promise<Object>} - A message indicating the success of the revocation
  * @throws {apiError} - If there is an error during token revocation
  */
@@ -245,7 +245,7 @@ const refreshAuthToken = async (refreshToken) => {
     throw new apiError(status.UNAUTHORIZED, "Invalid refresh token");
   }
 
-  const userId = tokenData.userID;
+  const userId = tokenData.userId;
 
   await revokeToken(refreshToken, tokenTypes.REFRESH, userId);
 
@@ -254,7 +254,7 @@ const refreshAuthToken = async (refreshToken) => {
 
 /**
  * @description Generates a reset password token for a user
- * @param {number} userId - The ID of the user
+ * @param {number} userId - The Id of the user
  * @return {Promise<Object>} - An object containing the reset password token and its expiration date
  * @throws {apiError} - If there is an error during token generation
  */
@@ -279,7 +279,7 @@ const resetPasswordToken = async (userId) => {
 
 /**
  * @description Generates an access token for a user
- * @param {number} userId - The ID of the user
+ * @param {number} userId - The Id of the user
  * @return {Promise<Object>} - An object containing the access token and its expiration date
  * @throws {apiError} - If there is an error during token generation
  */

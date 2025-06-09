@@ -36,7 +36,7 @@ const createInvoiceDetail = async (invoiceDetailData) => {
 
     return {
       message: "Invoice detail created successfully",
-      invoiceDetailId: result.invoiceDetailID,
+      invoiceDetailId: result.invoiceDetailId,
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -44,8 +44,8 @@ const createInvoiceDetail = async (invoiceDetailData) => {
 };
 
 /**
- * @description Get an invoice detail by ID
- * @param {number} invoiceDetailId - The ID of the invoice detail to be retrieved
+ * @description Get an invoice detail by Id
+ * @param {number} invoiceDetailId - The Id of the invoice detail to be retrieved
  * @return {Object} - The invoice detail data
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -65,9 +65,9 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
 };
 
 /**
- * @description Get all invoice details of a specific invoice by invoice ID
+ * @description Get all invoice details of a specific invoice by invoice Id
  *
- * @param {number} invoiceId - The ID of the invoice to get details for
+ * @param {number} invoiceId - The Id of the invoice to get details for
  * @return {Array} - An array of all invoice details
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -75,11 +75,11 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
 const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice ID is required");
+      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
     }
 
     const invoiceDetails = await InvoiceDetail.findAll({
-      where: { invoiceID: invoiceId }
+      where: { invoiceId: invoiceId }
     });
 
     if (invoiceDetails.length === 0) {
@@ -95,7 +95,7 @@ const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
 const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
     try {
         if (!invoiceDetailId) {
-        throw new apiError(status.BAD_REQUEST, "Invoice detail ID is required");
+        throw new apiError(status.BAD_REQUEST, "Invoice detail Id is required");
         }
 
         const fields = filterValidFields.filterValidFieldsFromObject(
@@ -110,7 +110,7 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         }
     
         const [affectedRows] = await InvoiceDetail.update(fields, {
-            where: { invoiceDetailID: invoiceDetailId }
+            where: { invoiceDetailId: invoiceDetailId }
         });
     
         if (affectedRows === 0) {
@@ -126,8 +126,8 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
 }
 
 /**
- * @description Delete an invoice detail by ID
- * @param {number} invoiceDetailId - The ID of the invoice detail to be deleted
+ * @description Delete an invoice detail by Id
+ * @param {number} invoiceDetailId - The Id of the invoice detail to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -135,11 +135,11 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
 const deleteInvoiceDetail = async (invoiceDetailId) => {
     try {
         if (!invoiceDetailId) {
-        throw new apiError(status.BAD_REQUEST, "Invoice detail ID is required");
+        throw new apiError(status.BAD_REQUEST, "Invoice detail Id is required");
         }
     
         const affectedRows = await InvoiceDetail.destroy({
-            where: { invoiceDetailID: invoiceDetailId }
+            where: { invoiceDetailId: invoiceDetailId }
         });
     
         if (affectedRows === 0) {

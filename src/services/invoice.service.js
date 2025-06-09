@@ -36,7 +36,7 @@ const createInvoice = async (invoiceData) => {
 
     return {
       message: "Invoice created successfully",
-      invoiceId: result.invoiceID,
+      invoiceId: result.invoiceId,
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -44,8 +44,8 @@ const createInvoice = async (invoiceData) => {
 };
 
 /**
- * @description Get an invoice by ID
- * @param {number} invoiceId - The ID of the invoice to be retrieved
+ * @description Get an invoice by Id
+ * @param {number} invoiceId - The Id of the invoice to be retrieved
  * @return {Object} - The invoice data
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -53,7 +53,7 @@ const createInvoice = async (invoiceData) => {
 const getInvoiceById = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice ID is required");
+      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
     }
 
     const invoice = await Invoice.findByPk(invoiceId);
@@ -91,8 +91,8 @@ const getInvoices = async (limit, offset) => {
 };
 
 /**
- * @description Update an invoice by ID
- * @param {number} invoiceId - The ID of the invoice to be updated
+ * @description Update an invoice by Id
+ * @param {number} invoiceId - The Id of the invoice to be updated
  * @param {Object} invoiceData - The updated invoice data
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -101,7 +101,7 @@ const getInvoices = async (limit, offset) => {
 const updateInvoice = async (invoiceId, invoiceData) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice ID is required");
+      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -116,7 +116,7 @@ const updateInvoice = async (invoiceId, invoiceData) => {
     }
 
     const [affectedRows] = await Invoice.update(fields, {
-      where: { invoiceID: invoiceId }
+      where: { invoiceId: invoiceId }
     });
 
     if (affectedRows === 0) {
@@ -133,8 +133,8 @@ const updateInvoice = async (invoiceId, invoiceData) => {
 };
 
 /**
- * @description Delete an invoice by ID
- * @param {number} invoiceId - The ID of the invoice to be deleted
+ * @description Delete an invoice by Id
+ * @param {number} invoiceId - The Id of the invoice to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -142,11 +142,11 @@ const updateInvoice = async (invoiceId, invoiceData) => {
 const deleteInvoice = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice ID is required");
+      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
     }
 
     const affectedRows = await Invoice.destroy({
-      where: { invoiceID: invoiceId }
+      where: { invoiceId: invoiceId }
     });
 
     if (affectedRows === 0) {

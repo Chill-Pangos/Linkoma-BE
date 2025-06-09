@@ -36,7 +36,7 @@ const createServiceRegistration = async (serviceRegistrationData) => {
 
     return {
       message: "Service registration created successfully",
-      serviceRegistrationId: result.serviceRegistrationID,
+      serviceRegistrationId: result.serviceRegistrationId,
     };
   } catch (error) {
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
@@ -44,8 +44,8 @@ const createServiceRegistration = async (serviceRegistrationData) => {
 };
 
 /**
- * @description Get a service registration by ID
- * @param {number} serviceRegistrationId - The ID of the service registration to be retrieved
+ * @description Get a service registration by Id
+ * @param {number} serviceRegistrationId - The Id of the service registration to be retrieved
  * @return {Object} - The service registration data
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -55,7 +55,7 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
     if (!serviceRegistrationId) {
       throw new apiError(
         status.BAD_REQUEST,
-        "Service registration ID is required"
+        "Service registration Id is required"
       );
     }
 
@@ -73,7 +73,7 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
 
 /**
  * @description Get all service registrations of an apartment
- * @param {number} apartmentId - The ID of the apartment whose service registrations are to be retrieved
+ * @param {number} apartmentId - The Id of the apartment whose service registrations are to be retrieved
  * @return {Array} - An array of service registrations
  * @throws {apiError} - If there is an error during the retrieval
  * */
@@ -81,11 +81,11 @@ const getServiceRegistrationById = async (serviceRegistrationId) => {
 const getServiceRegistrationByApartmentId = async (apartmentId) => {
   try {
     if (!apartmentId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment ID is required");
+      throw new apiError(status.BAD_REQUEST, "Apartment Id is required");
     }
 
     const serviceRegistrations = await ServiceRegistration.findAll({
-      where: { apartmentID: apartmentId }
+      where: { apartmentId: apartmentId }
     });
 
     if (serviceRegistrations.length === 0) {
@@ -100,7 +100,7 @@ const getServiceRegistrationByApartmentId = async (apartmentId) => {
 
 /**
  * @description Update a service registration in the database
- * @param {number} serviceRegistrationId - The ID of the service registration to be updated
+ * @param {number} serviceRegistrationId - The Id of the service registration to be updated
  * @param {Object} serviceRegistrationData - The updated service registration data
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -114,7 +114,7 @@ const updateServiceRegistration = async (
     if (!serviceRegistrationId) {
       throw new apiError(
         status.BAD_REQUEST,
-        "Service registration ID is required"
+        "Service registration Id is required"
       );
     }
 
@@ -130,7 +130,7 @@ const updateServiceRegistration = async (
     }
 
     const [affectedRows] = await ServiceRegistration.update(fields, {
-      where: { serviceRegistrationID: serviceRegistrationId }
+      where: { serviceRegistrationId: serviceRegistrationId }
     });
 
     if (affectedRows === 0) {
@@ -150,8 +150,8 @@ const updateServiceRegistration = async (
 };
 
 /**
- * @description Delete a service registration by ID
- * @param {number} serviceRegistrationId - The ID of the service registration to be deleted
+ * @description Delete a service registration by Id
+ * @param {number} serviceRegistrationId - The Id of the service registration to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  * */
@@ -161,12 +161,12 @@ const deleteServiceRegistration = async (serviceRegistrationId) => {
     if (!serviceRegistrationId) {
       throw new apiError(
         status.BAD_REQUEST,
-        "Service registration ID is required"
+        "Service registration Id is required"
       );
     }
 
     const affectedRows = await ServiceRegistration.destroy({
-      where: { serviceRegistrationID: serviceRegistrationId }
+      where: { serviceRegistrationId: serviceRegistrationId }
     });
 
     if (affectedRows === 0) {
