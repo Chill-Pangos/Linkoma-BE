@@ -22,6 +22,8 @@ const createUser = async (userData) => {
       userFieldConfig.insertableFields
     );
 
+    const pwd = fields.password;
+
     if (fields.password) {
       const salt = await bcrypt.genSalt(10);
       fields.password = await bcrypt.hash(fields.password, salt);
@@ -41,7 +43,7 @@ const createUser = async (userData) => {
 
     await emailService.sendAccountEmail(
       user.email,
-      fields.password
+      pwd
     );
 
     return { message: "User created successfully", userId: user.userId };
@@ -232,7 +234,31 @@ const createUserWithEmail = async (email) => {
       );
     }
 
-    const password = crypto.randomBytes(6).toString("base64").slice(0, 8);
+    // Generate cryptographically secure password: 4 letters + 4 numbers
+    const letterChars = 'abcdefghijklmnopqrstuvwxyz';
+    const numberChars = '0123456789';
+    
+    const getRandomIndex = (arrayLength) => {
+      const maxValid = Math.floor(256 / arrayLength) * arrayLength;
+      let randomByte;
+      do {
+        randomByte = crypto.randomBytes(1)[0];
+      } while (randomByte >= maxValid);
+      return randomByte % arrayLength;
+    };
+    
+    let letters = '';
+    let numbers = '';
+    
+    for (let i = 0; i < 4; i++) {
+      letters += letterChars[getRandomIndex(letterChars.length)];
+    }
+    
+    for (let i = 0; i < 4; i++) {
+      numbers += numberChars[getRandomIndex(numberChars.length)];
+    }
+    
+    const password = letters + numbers;
 
     return await createUser({ email, password });
   } catch (error) {
