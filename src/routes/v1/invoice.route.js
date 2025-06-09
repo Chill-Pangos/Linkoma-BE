@@ -20,6 +20,12 @@ const getInvoicesLimit = rateLimit({
   message: 'Too many requests, please try again later.',
 });
 
+const updateDeleteLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // limit each IP to 30 requests per windowMs
+  message: 'Too many update/delete attempts, please try again later.',
+});
+
 router
   .route('/')
   .post(
@@ -53,11 +59,13 @@ router
     invoiceController.getInvoice
   )
   .patch(
+    updateDeleteLimit,
     auth('manageInvoices'),
     validate(invoiceValidation.updateInvoice),
     invoiceController.updateInvoice
   )
   .delete(
+    updateDeleteLimit,
     auth('manageInvoices'),
     validate(invoiceValidation.deleteInvoice),
     invoiceController.deleteInvoice

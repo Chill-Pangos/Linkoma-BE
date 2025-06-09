@@ -51,9 +51,9 @@ const createUser = async (userData) => {
 };
 
 /**
- * @description Get a user by Id
+ * @description Get a user by ID
  *
- * @param {number} userId - The Id of the user to be retrieved
+ * @param {number} userId - The ID of the user to be retrieved
  * @return {Object} - The user data
  * @throws {apiError} - If there is an error during the retrieval
  */
@@ -61,7 +61,7 @@ const createUser = async (userData) => {
 const getUserById = async (userId) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User Id is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const user = await User.findByPk(userId);
@@ -110,9 +110,9 @@ const getUsers = async (limit, offset) => {
 };
 
 /**
- * @description Update a user by Id
+ * @description Update a user by ID
  *
- * @param {number} userId - The Id of the user to be updated
+ * @param {number} userId - The ID of the user to be updated
  * @param {Object} userData  - The user data to be updated
  * @return {Object} - The result of the update
  * @throws {apiError} - If there is an error during the update
@@ -121,7 +121,7 @@ const getUsers = async (limit, offset) => {
 const updateUser = async (userId, userData) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User Id is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -155,9 +155,9 @@ const updateUser = async (userId, userData) => {
 };
 
 /**
- * @description Delete a user by Id
+ * @description Delete a user by ID
  *
- * @param {number} userId - The Id of the user to be deleted
+ * @param {number} userId - The ID of the user to be deleted
  * @return {Object} - The result of the deletion
  * @throws {apiError} - If there is an error during the deletion
  */
@@ -165,7 +165,7 @@ const updateUser = async (userId, userData) => {
 const deleteUser = async (userId) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User Id is required");
+      throw new apiError(status.BAD_REQUEST, "User ID is required");
     }
 
     const deletedRows = await User.destroy({
@@ -220,7 +220,10 @@ const getUserByEmail = async (email) => {
 
 const createUserWithEmail = async (email) => {
   try {
-    const existingUser = await getUserByEmail(email);
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      where: { email: email }
+    });
 
     if (existingUser) {
       throw new apiError(
@@ -233,6 +236,10 @@ const createUserWithEmail = async (email) => {
 
     return await createUser({ email, password });
   } catch (error) {
+    // If it's already an apiError, re-throw it
+    if (error.isOperational) {
+      throw error;
+    }
     throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
