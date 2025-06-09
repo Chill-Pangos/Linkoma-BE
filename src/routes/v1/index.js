@@ -9,6 +9,8 @@ const apartmentRoute = require("./apartment.route");
 const apartmentTypeRoute = require("./apartmentType.route");
 const serviceTypeRoute = require("./serviceType.route");
 const serviceRegistrationRoute = require("./serviceRegistration.route");
+const invoiceRoute = require("./invoice.route");
+const invoiceDetailRoute = require("./invoiceDetail.route");
 
 const router = express.Router();
 
@@ -52,6 +54,14 @@ const defaultRoutes = [
     {
         path: "/service-registrations",
         route: serviceRegistrationRoute,
+    },
+    {
+        path: "/invoices",
+        route: invoiceRoute,
+    },
+    {
+        path: "/invoice-details",
+        route: invoiceDetailRoute,
     }
 ];
 
