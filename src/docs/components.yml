@@ -91,6 +91,7 @@ components:
         type: 
           type: string 
           maxLength: 50
+          enum: [General, Urgent, Maintenance, Event]
           example: "General"
         priority:
           type: string
@@ -491,3 +492,54 @@ components:
           type: string
         statusCode:
           type: integer
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Validation error"
+            statusCode: 400
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Please authenticate"
+            statusCode: 401
+    
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Forbidden"
+            statusCode: 403
+    
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Not found"
+            statusCode: 404
+    
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "Internal server error"
+            statusCode: 500
