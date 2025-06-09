@@ -2,6 +2,7 @@ const ServiceRegistration = require("../models/serviceRegistration.model");
 const serviceRegistrationFieldConfig = require("../config/fieldConfig/serviceRegistration.fieldconfig");
 const apiError = require("../utils/apiError");
 const { status } = require("http-status");
+const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -181,10 +182,63 @@ const deleteServiceRegistration = async (serviceRegistrationId) => {
   }
 };
 
+/**
+ * @description Query service registrations with filtering and pagination
+ * @param {Object} filter - Filter object with apartmentId, serviceTypeId, status, startDate, endDate
+ * @param {Object} options - Options object with sortBy, limit, page
+ * @return {Object} - Paginated service registrations with total count
+ * @throws {apiError} - If there is an error during the query
+ */
+const queryServiceRegistrations = async (filter, options) => {
+  try {
+    const { apartmentId, serviceTypeId, status, startDate, endDate } = filter;
+    const { sortBy, limit = 10, page = 1 } = options;
+
+    // Build where clause
+    const where = {};
+    if (apartmentId) where.apartmentId = apartmentId;
+    if (serviceTypeId) where.serviceTypeId = serviceTypeId;
+    if (status) where.status = status;
+    if (startDate) where.startDate = { [Op.gte]: startDate };
+    if (endDate) where.endDate = { [Op.lte]: endDate };
+
+    // Build order clause
+    let order = [];
+    if (sortBy) {
+      const [field, direction] = sortBy.split(':');
+      order = [[field, direction?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']];
+    } else {
+      order = [['createdAt', 'DESC']];
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await ServiceRegistration.findAndCountAll({
+      where,
+      order,
+      limit: parseInt(limit),
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      results: rows,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+      totalResults: count,
+    };
+  } catch (error) {
+    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 module.exports = {
   createServiceRegistration,
   getServiceRegistrationById,
   getServiceRegistrationByApartmentId,
+  queryServiceRegistrations,
   updateServiceRegistration,
   deleteServiceRegistration,
 };
