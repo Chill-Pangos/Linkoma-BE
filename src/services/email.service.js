@@ -37,6 +37,41 @@ const sendResetPasswordEmail = async (toEmail, resetToken) => {
     }
 }   
 
+/**
+ * @description Sends an email to the user with their account information after successful account creation
+ *
+ * @param {string} toEmail - The email address to send the account information to
+ * @param {string} password - The password for the newly created account
+ * @return {Object} - A message indicating success or failure
+ * @throws {apiError} - If there is an error during the email sending process
+ */
+
+const sendAccountEmail = async (toEmail, password) => {
+    const mailOptions = {
+        from: `"Linkoma" <${config.email.user}>`,
+        to: toEmail,
+        subject: 'Tài khoản của bạn đã được tạo',
+        html: `
+            <h1>Tài khoản của bạn đã được tạo</h1>
+            <p>Tài khoản của bạn đã được tạo thành công. Dưới đây là thông tin đăng nhập của bạn:</p>
+            <p>Email: ${toEmail}</p>
+            <p>Mật khẩu: ${password}</p>
+            <p>Vui lòng đăng nhập và thay đổi mật khẩu của bạn ngay lập tức.</p>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+
+        return {
+            message: 'Account email sent successfully',
+        };
+    } catch (error) {
+        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
 module.exports = {
-    sendResetPasswordEmail, 
-}
+    sendResetPasswordEmail,
+    sendAccountEmail,
+};

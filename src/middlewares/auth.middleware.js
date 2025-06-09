@@ -3,7 +3,7 @@ const { tokenTypes } = require("../config/tokens");
 const apiError = require("../utils/apiError");
 const { status } = require("http-status");
 const catchAsync = require("../utils/catchAsync");
-const permissionService = require("../services/permission.service");
+const roleService = require("../services/role.service");
 const userService = require("../services/user.service");
 
 /**
@@ -71,15 +71,20 @@ const auth = (...requiredPermissions) =>
   });
 
 /**
+ * @description Check if user role has required permissions
+ * @param {string} userRole - User's role
+ * @param {Array} requiredPermissions - Array of required permissions
+ * @throws {apiError} If user doesn't have required permissions
  */
-const checkPermissions = async (role, requiredPermissions) => {
+const checkPermissions = async (userRole, requiredPermissions) => {
   if (!requiredPermissions.length) return;
 
-  const hasPermission = await permissionService.checkPermissions(
-    role,
-    requiredPermissions
+  // Check if user role has all required permissions
+  const hasAllPermissions = requiredPermissions.every(permission => 
+    roleService.hasPermission(userRole, permission)
   );
-  if (!hasPermission) {
+
+  if (!hasAllPermissions) {
     throw new apiError(
       status.FORBIDDEN,
       "You do not have permission to access this resource"

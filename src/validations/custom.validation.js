@@ -17,7 +17,15 @@ const emails = (value, helpers) => {
   return value;
 };
 
+const objectId = (value, helpers) => {
+  if (!Number.isInteger(Number(value)) || Number(value) <= 0) {
+    return helpers.message('"{{#label}}" must be a valid positive integer');
+  }
+  return value;
+};
+
 module.exports = {
   password,
   emails,
+  objectId,
 };
