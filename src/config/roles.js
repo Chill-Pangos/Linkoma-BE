@@ -8,7 +8,8 @@ const allRoles = {
     'getFeedbacks',
     'viewInvoices',
     'viewServices',
-    'registerService'
+    'registerService',
+    'getApartments'
   ],
   manager: [
     'getProfile',
