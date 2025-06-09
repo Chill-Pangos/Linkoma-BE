@@ -21,14 +21,14 @@ app.set('trust proxy', 1);
 
 // enable CORS
 app.use(cors({
-  origin: config.frontendUrl,
+  origin: true,
   credentials: true,
   exposedHeaders: ['Authorization'],
 }));
 app.options(
   /(.*)/,
   cors({
-    origin: config.frontendUrl,
+    origin: true,
     credentials: true,
     exposedHeaders: ['Authorization'],
   })
