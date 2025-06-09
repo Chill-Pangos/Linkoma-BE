@@ -22,6 +22,8 @@ const createUser = async (userData) => {
       userFieldConfig.insertableFields
     );
 
+    const pwd = fields.password;
+
     if (fields.password) {
       const salt = await bcrypt.genSalt(10);
       fields.password = await bcrypt.hash(fields.password, salt);
@@ -41,7 +43,7 @@ const createUser = async (userData) => {
 
     await emailService.sendAccountEmail(
       user.email,
-      fields.password
+      pwd
     );
 
     return { message: "User created successfully", userId: user.userId };
@@ -232,7 +234,10 @@ const createUserWithEmail = async (email) => {
       );
     }
 
-    const password = crypto.randomBytes(6).toString("base64").slice(0, 8);
+    // Generate simple password: 4 random letters + 4 random numbers
+    const letters = Math.random().toString(36).substring(2, 6);
+    const numbers = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const password = letters + numbers;
 
     return await createUser({ email, password });
   } catch (error) {

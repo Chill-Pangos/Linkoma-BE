@@ -16,6 +16,9 @@ require("dotenv").config();
 
 const app = express();
 
+// Trust proxy to handle X-Forwarded-For headers properly for rate limiting
+app.set('trust proxy', 1);
+
 // enable CORS
 app.use(cors({
   origin: config.frontendUrl,
