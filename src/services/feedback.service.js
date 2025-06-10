@@ -1,7 +1,7 @@
 const Feedback = require("../models/feedback.model");
 const feedbackFieldConfig = require("../config/fieldConfig/feedback.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -22,14 +22,14 @@ const createFeedback = async (feedbackData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const feedback = await Feedback.create(fields);
 
     if (!feedback) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Feedback creation failed"
       );
     }
@@ -39,7 +39,7 @@ const createFeedback = async (feedbackData) => {
       feedbackId: feedback.feedbackId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -53,18 +53,18 @@ const createFeedback = async (feedbackData) => {
 const getFeedbackById = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
+      throw new apiError(400, "Feedback Id is required");
     }
 
     const feedback = await Feedback.findByPk(feedbackId);
 
     if (!feedback) {
-      throw new apiError(status.NOT_FOUND, "Feedback not found");
+      throw new apiError(404, "Feedback not found");
     }
 
     return feedback;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -112,7 +112,7 @@ const getFeedbacks = async (limit = 10, offset = 0, filters = {}, sortBy = 'crea
       limit: parseInt(limit)
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -127,7 +127,7 @@ const getFeedbacks = async (limit = 10, offset = 0, filters = {}, sortBy = 'crea
 const updateFeedback = async (feedbackId, feedbackData) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
+      throw new apiError(400, "Feedback Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -138,7 +138,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await Feedback.update(fields, {
@@ -147,7 +147,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
 
     if (affectedRows === 0) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Feedback update failed"
       );
     }
@@ -157,7 +157,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
       feedbackId: feedbackId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -171,7 +171,7 @@ const updateFeedback = async (feedbackId, feedbackData) => {
 const deleteFeedback = async (feedbackId) => {
   try {
     if (!feedbackId) {
-      throw new apiError(status.BAD_REQUEST, "Feedback Id is required");
+      throw new apiError(400, "Feedback Id is required");
     }
 
     const deletedRows = await Feedback.destroy({
@@ -179,7 +179,7 @@ const deleteFeedback = async (feedbackId) => {
     });
 
     if (deletedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Feedback not found");
+      throw new apiError(404, "Feedback not found");
     }
 
     return {
@@ -187,7 +187,7 @@ const deleteFeedback = async (feedbackId) => {
       feedbackId: feedbackId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

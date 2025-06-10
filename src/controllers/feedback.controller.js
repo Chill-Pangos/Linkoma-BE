@@ -7,7 +7,7 @@ const { feedbackService } = require('../services');
  */
 const createFeedback = catchAsync(async (req, res) => {
   const feedback = await feedbackService.createFeedback(req.body);
-  res.status(httpStatus.CREATED).send(feedback);
+  res.status(201).send(feedback);
 });
 
 /**

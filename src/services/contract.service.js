@@ -1,7 +1,7 @@
 const Contract = require("../models/contract.model");
 const contractFieldConfig = require("../config/fieldConfig/contract.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -23,14 +23,14 @@ const createContract = async (contractData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const contract = await Contract.create(fields);
 
     if (!contract) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Contract creation failed"
       );
     }
@@ -40,7 +40,7 @@ const createContract = async (contractData) => {
       contractId: contract.contractId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -55,18 +55,18 @@ const createContract = async (contractData) => {
 const getContractById = async (contractId) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
+      throw new apiError(400, "Contract Id is required");
     }
 
     const contract = await Contract.findByPk(contractId);
 
     if (!contract) {
-      throw new apiError(status.NOT_FOUND, "Contract not found");
+      throw new apiError(404, "Contract not found");
     }
 
     return contract;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -88,12 +88,12 @@ const getContracts = async (limit, offset) => {
     });
 
     if (contracts.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No contracts found");
+      throw new apiError(404, "No contracts found");
     }
 
     return contracts;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -109,7 +109,7 @@ const getContracts = async (limit, offset) => {
 const updateContract = async (contractId, contractData) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
+      throw new apiError(400, "Contract Id is required");
     }
     
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -120,7 +120,7 @@ const updateContract = async (contractId, contractData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await Contract.update(fields, {
@@ -129,7 +129,7 @@ const updateContract = async (contractId, contractData) => {
 
     if (affectedRows === 0) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Contract update failed"
       );
     }
@@ -139,7 +139,7 @@ const updateContract = async (contractId, contractData) => {
       contractId: contractId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -154,7 +154,7 @@ const updateContract = async (contractId, contractData) => {
 const deleteContract = async (contractId) => {
   try {
     if (!contractId) {
-      throw new apiError(status.BAD_REQUEST, "Contract Id is required");
+      throw new apiError(400, "Contract Id is required");
     }
 
     const deletedRows = await Contract.destroy({
@@ -162,7 +162,7 @@ const deleteContract = async (contractId) => {
     });
 
     if (deletedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Contract not found");
+      throw new apiError(404, "Contract not found");
     }
 
     return {
@@ -170,7 +170,7 @@ const deleteContract = async (contractId) => {
       contractId: contractId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

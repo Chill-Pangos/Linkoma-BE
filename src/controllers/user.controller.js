@@ -7,7 +7,7 @@ const { userService } = require('../services');
  */
 const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
-  res.status(httpStatus.CREATED).send(user);
+  res.status(201).send(user);
 });
 
 /**
@@ -58,7 +58,7 @@ const getUserByEmail = catchAsync(async (req, res) => {
  */
 const createUserWithEmail = catchAsync(async (req, res) => {
   const user = await userService.createUserWithEmail(req.body.email);
-  res.status(httpStatus.CREATED).send(user);
+  res.status(201).send(user);
 });
 
 module.exports = {

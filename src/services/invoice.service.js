@@ -3,9 +3,10 @@ const InvoiceDetail = require("../models/invoiceDetail.model");
 const ServiceRegistration = require("../models/serviceRegistration.model");
 const ServiceType = require("../models/serviceType.model");
 const Apartment = require("../models/apartment.model");
+const ApartmentType = require("../models/apartmentType.model");
 const invoiceFieldConfig = require("../config/fieldConfig/invoice.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -28,12 +29,19 @@ const createInvoiceWithDetails = async (invoiceData) => {
   const transaction = await Invoice.sequelize.transaction();
   
   try {
-    const { apartmentId, rentFee, dueDate, serviceUsages = [] } = invoiceData;
+    const { apartmentId, dueDate, serviceUsages } = invoiceData;
 
     // Validate apartment exists
-    const apartment = await Apartment.findByPk(apartmentId);
+    const apartment = await Apartment.findByPk(apartmentId, {
+      include: [{
+        model: ApartmentType,
+        as: 'apartmentType',
+        attributes: ['rentFee', 'area', 'typeName']
+      }]
+    });
+    
     if (!apartment) {
-      throw new apiError(status.NOT_FOUND, "Apartment not found");
+      throw new apiError(404, "Apartment not found");
     }
 
     // Get active service registrations for the apartment
@@ -44,9 +52,28 @@ const createInvoiceWithDetails = async (invoiceData) => {
       },
       include: [{
         model: ServiceType,
+        as: 'serviceType',
         attributes: ['serviceTypeId', 'serviceName', 'unit', 'unitPrice']
       }]
     });
+
+    if (serviceRegistrations.length === 0) {
+      throw new apiError(400, "No active service registrations found for this apartment");
+    }
+
+    // Validate that all provided serviceUsages are registered for the apartment
+    for (const usage of serviceUsages) {
+      const isRegistered = serviceRegistrations.some(reg => 
+        reg.serviceTypeId === usage.serviceTypeId
+      );
+      
+      if (!isRegistered) {
+        throw new apiError(
+          400, 
+          `Service type ${usage.serviceTypeId} is not registered for this apartment`
+        );
+      }
+    }
 
     // Calculate service fee from provided usages
     let totalServiceFee = 0;
@@ -57,28 +84,28 @@ const createInvoiceWithDetails = async (invoiceData) => {
         reg.serviceTypeId === usage.serviceTypeId
       );
 
-      if (!registration) {
-        throw new apiError(
-          status.BAD_REQUEST, 
-          `Service type ${usage.serviceTypeId} is not registered for this apartment`
-        );
-      }
-
-      const serviceType = registration.ServiceType;
-      const totalAmount = usage.usage * serviceType.unitPrice;
+      const serviceType = registration.serviceType;
+      const totalAmount = usage.usage * parseFloat(serviceType.unitPrice);
       totalServiceFee += totalAmount;
 
       invoiceDetails.push({
         serviceTypeId: usage.serviceTypeId,
         usage: usage.usage,
-        totalAmount
+        totalAmount: totalAmount
       });
+    }
+
+    // Get rent fee from apartment type
+    const rentFee = apartment.apartmentType?.rentFee || 0;
+    
+    if (!apartment.apartmentType || rentFee === 0) {
+      throw new apiError(400, "Apartment type or rent fee not found");
     }
 
     // Create invoice
     const invoice = await Invoice.create({
       apartmentId,
-      rentFee: rentFee || apartment.rentFee || 0,
+      rentFee: rentFee,
       serviceFee: totalServiceFee,
       dueDate,
       status: 'Unpaid'
@@ -97,12 +124,26 @@ const createInvoiceWithDetails = async (invoiceData) => {
     return {
       message: "Invoice with details created successfully",
       invoiceId: invoice.invoiceId,
-      totalServiceFee,
-      invoiceDetailsCount: invoiceDetails.length
+      rentFee: rentFee,
+      serviceFee: totalServiceFee,
+      totalAmount: rentFee + totalServiceFee,
+      invoiceDetailsCount: invoiceDetails.length,
+      serviceDetails: invoiceDetails.map(detail => {
+        const registration = serviceRegistrations.find(reg => 
+          reg.serviceTypeId === detail.serviceTypeId
+        );
+        return {
+          serviceName: registration.serviceType.serviceName,
+          unit: registration.serviceType.unit,
+          unitPrice: registration.serviceType.unitPrice,
+          usage: detail.usage,
+          totalAmount: detail.totalAmount
+        };
+      })
     };
   } catch (error) {
     await transaction.rollback();
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -116,14 +157,14 @@ const createInvoice = async (invoiceData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const result = await Invoice.create(fields);
 
     if (!result) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Invoice creation failed"
       );
     }
@@ -133,7 +174,7 @@ const createInvoice = async (invoiceData) => {
       invoiceId: result.invoiceId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -147,18 +188,18 @@ const createInvoice = async (invoiceData) => {
 const getInvoiceById = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
+      throw new apiError(400, "Invoice Id is required");
     }
 
     const invoice = await Invoice.findByPk(invoiceId);
 
     if (!invoice) {
-      throw new apiError(status.NOT_FOUND, "Invoice not found");
+      throw new apiError(404, "Invoice not found");
     }
 
     return invoice;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -180,7 +221,7 @@ const getInvoices = async (limit, offset) => {
 
     return invoices;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -195,7 +236,7 @@ const getInvoices = async (limit, offset) => {
 const updateInvoice = async (invoiceId, invoiceData) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
+      throw new apiError(400, "Invoice Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -206,7 +247,7 @@ const updateInvoice = async (invoiceId, invoiceData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await Invoice.update(fields, {
@@ -214,7 +255,7 @@ const updateInvoice = async (invoiceId, invoiceData) => {
     });
 
     if (affectedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Invoice not found");
+      throw new apiError(404, "Invoice not found");
     }
 
     return {
@@ -222,7 +263,7 @@ const updateInvoice = async (invoiceId, invoiceData) => {
       invoiceId: invoiceId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -236,7 +277,7 @@ const updateInvoice = async (invoiceId, invoiceData) => {
 const deleteInvoice = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
+      throw new apiError(400, "Invoice Id is required");
     }
 
     const affectedRows = await Invoice.destroy({
@@ -244,7 +285,7 @@ const deleteInvoice = async (invoiceId) => {
     });
 
     if (affectedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Invoice not found");
+      throw new apiError(404, "Invoice not found");
     }
 
     return {
@@ -252,7 +293,7 @@ const deleteInvoice = async (invoiceId) => {
       invoiceId: invoiceId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -316,7 +357,7 @@ const queryInvoices = async (filter, options) => {
       totalResults: count,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

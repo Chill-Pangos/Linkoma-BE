@@ -3,7 +3,7 @@ const ApartmentType = require("../models/apartmentType.model");
 const apartmentFieldConfig = require("../config/fieldConfig/apartment.fieldconfig");
 const apartmentTypeFieldConfig = require("../config/fieldConfig/apartmentType.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 const pick = require("../utils/pick");
@@ -25,21 +25,21 @@ const createApartment = async (apartmentData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     // Check if apartment type exists
     if (fields.apartmentTypeId) {
       const apartmentType = await ApartmentType.findByPk(fields.apartmentTypeId);
       if (!apartmentType) {
-        throw new apiError(status.BAD_REQUEST, "Apartment type not found");
+        throw new apiError(400, "Apartment type not found");
       }
     }
 
     const apartment = await Apartment.create(fields);
 
     if (!apartment) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, "Failed to create apartment");
+      throw new apiError(500, "Failed to create apartment");
     }
 
     return apartment;
@@ -129,7 +129,7 @@ const getApartmentById = async (apartmentId) => {
     });
 
     if (!apartment) {
-      throw new apiError(status.NOT_FOUND, "Apartment not found");
+      throw new apiError(404, "Apartment not found");
     }
 
     return apartment;
@@ -156,20 +156,20 @@ const updateApartmentById = async (apartmentId, updateData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     // Check if apartment type exists (if being updated)
     if (fields.apartmentTypeId) {
       const apartmentType = await ApartmentType.findByPk(fields.apartmentTypeId);
       if (!apartmentType) {
-        throw new apiError(status.BAD_REQUEST, "Apartment type not found");
+        throw new apiError(400, "Apartment type not found");
       }
     }
 
     const apartment = await Apartment.findByPk(apartmentId);
     if (!apartment) {
-      throw new apiError(status.NOT_FOUND, "Apartment not found");
+      throw new apiError(404, "Apartment not found");
     }
 
     await apartment.update(fields);
@@ -202,7 +202,7 @@ const deleteApartmentById = async (apartmentId) => {
   try {
     const apartment = await Apartment.findByPk(apartmentId);
     if (!apartment) {
-      throw new apiError(status.NOT_FOUND, "Apartment not found");
+      throw new apiError(404, "Apartment not found");
     }
 
     await apartment.destroy();
@@ -231,13 +231,13 @@ const createApartmentType = async (apartmentTypeData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const apartmentType = await ApartmentType.create(fields);
 
     if (!apartmentType) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, "Failed to create apartment type");
+      throw new apiError(500, "Failed to create apartment type");
     }
 
     return apartmentType;
@@ -316,7 +316,7 @@ const getApartmentTypeById = async (apartmentTypeId) => {
     const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
 
     if (!apartmentType) {
-      throw new apiError(status.NOT_FOUND, "Apartment type not found");
+      throw new apiError(404, "Apartment type not found");
     }
 
     return apartmentType;
@@ -343,12 +343,12 @@ const updateApartmentTypeById = async (apartmentTypeId, updateData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
     if (!apartmentType) {
-      throw new apiError(status.NOT_FOUND, "Apartment type not found");
+      throw new apiError(404, "Apartment type not found");
     }
 
     await apartmentType.update(fields);
@@ -374,12 +374,12 @@ const deleteApartmentTypeById = async (apartmentTypeId) => {
     });
 
     if (apartmentsUsingType > 0) {
-      throw new apiError(status.BAD_REQUEST, "Cannot delete apartment type that is being used by apartments");
+      throw new apiError(400, "Cannot delete apartment type that is being used by apartments");
     }
 
     const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
     if (!apartmentType) {
-      throw new apiError(status.NOT_FOUND, "Apartment type not found");
+      throw new apiError(404, "Apartment type not found");
     }
 
     await apartmentType.destroy();

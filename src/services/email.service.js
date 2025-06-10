@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const config = require('../config/config');
 const apiError = require('../utils/apiError');
-const { status } = require('http-status');
+const httpStatus= require('http-status');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -33,7 +33,7 @@ const sendResetPasswordEmail = async (toEmail, resetToken) => {
             message: 'Reset password email sent successfully',
         };
     } catch (error) {
-        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(500, error.message);
     }
 }   
 
@@ -67,7 +67,7 @@ const sendAccountEmail = async (toEmail, password) => {
             message: 'Account email sent successfully',
         };
     } catch (error) {
-        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(500, error.message);
     }
 };
 

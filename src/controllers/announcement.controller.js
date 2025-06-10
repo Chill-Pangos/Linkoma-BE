@@ -6,7 +6,7 @@ const { announcementService } = require('../services');
 
 const createAnnouncement = catchAsync(async (req, res) => {
   const result = await announcementService.createAnnouncement(req.body);
-  res.status(httpStatus.CREATED).send(result);
+  res.status(201).send(result);
 });
 
 const getAnnouncements = catchAsync(async (req, res) => {
@@ -42,7 +42,7 @@ const updateAnnouncement = catchAsync(async (req, res) => {
 
 const deleteAnnouncement = catchAsync(async (req, res) => {
   await announcementService.deleteAnnouncement(req.params.announcementId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 const getUserAnnouncements = catchAsync(async (req, res) => {

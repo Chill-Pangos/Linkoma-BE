@@ -3,7 +3,7 @@ const ServiceType = require("../models/serviceType.model");
 const Invoice = require("../models/invoice.model");
 const invoiceDetailFieldConfig = require("../config/fieldConfig/invoiceDetail.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -25,14 +25,14 @@ const createInvoiceDetail = async (invoiceDetailData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const result = await InvoiceDetail.create(fields);
 
     if (!result) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Invoice detail creation failed"
       );
     }
@@ -42,7 +42,7 @@ const createInvoiceDetail = async (invoiceDetailData) => {
       invoiceDetailId: result.invoiceDetailId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -58,12 +58,12 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
     const invoiceDetail = await InvoiceDetail.findByPk(invoiceDetailId);
 
     if (!invoiceDetail) {
-      throw new apiError(status.NOT_FOUND, "Invoice detail not found");
+      throw new apiError(404, "Invoice detail not found");
     }
 
     return invoiceDetail;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -78,7 +78,7 @@ const getInvoiceDetailById = async (invoiceDetailId) => {
 const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
   try {
     if (!invoiceId) {
-      throw new apiError(status.BAD_REQUEST, "Invoice Id is required");
+      throw new apiError(400, "Invoice Id is required");
     }
 
     const invoiceDetails = await InvoiceDetail.findAll({
@@ -86,19 +86,19 @@ const getInvoiceDetailsByInvoiceId = async (invoiceId) => {
     });
 
     if (invoiceDetails.length === 0) {
-      throw new apiError(status.NOT_FOUND, "Invoice detail not found");
+      throw new apiError(404, "Invoice detail not found");
     }
 
     return invoiceDetails;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
 const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
     try {
         if (!invoiceDetailId) {
-        throw new apiError(status.BAD_REQUEST, "Invoice detail Id is required");
+        throw new apiError(400, "Invoice detail Id is required");
         }
 
         const fields = filterValidFields.filterValidFieldsFromObject(
@@ -109,7 +109,7 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         const entries = Object.entries(fields);
     
         if (entries.length === 0) {
-        throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+        throw new apiError(400, "No valid fields provided");
         }
     
         const [affectedRows] = await InvoiceDetail.update(fields, {
@@ -117,14 +117,14 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
         });
     
         if (affectedRows === 0) {
-        throw new apiError(status.NOT_FOUND, "Invoice detail not found");
+        throw new apiError(404, "Invoice detail not found");
         }
     
         return {
         message: "Invoice detail updated successfully",
         };
     } catch (error) {
-        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(500, error.message);
     }
 }
 
@@ -138,7 +138,7 @@ const updateInvoiceDetail = async (invoiceDetailId, invoiceDetailData) => {
 const deleteInvoiceDetail = async (invoiceDetailId) => {
     try {
         if (!invoiceDetailId) {
-        throw new apiError(status.BAD_REQUEST, "Invoice detail Id is required");
+        throw new apiError(400, "Invoice detail Id is required");
         }
     
         const affectedRows = await InvoiceDetail.destroy({
@@ -146,14 +146,14 @@ const deleteInvoiceDetail = async (invoiceDetailId) => {
         });
     
         if (affectedRows === 0) {
-        throw new apiError(status.NOT_FOUND, "Invoice detail not found");
+        throw new apiError(404, "Invoice detail not found");
         }
     
         return {
         message: "Invoice detail deleted successfully",
         };
     } catch (error) {
-        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(500, error.message);
     }
 }
 
@@ -219,7 +219,7 @@ const queryInvoiceDetails = async (filter, options) => {
       totalResults: count,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

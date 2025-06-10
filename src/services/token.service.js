@@ -4,7 +4,7 @@ const { tokenTypes } = require("../config/tokens");
 const config = require("../config/config");
 const Token = require("../models/tokens.model");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const { ref } = require("joi");
 
 /**
@@ -27,7 +27,7 @@ const generateToken = async (
     sub: userId,
     type,
     iat: day().unix(),
-    exp: day().add(expires).unix(),
+    exp: Math.floor(expires.getTime() / 1000),
   };
 
   return jwt.sign(payload, secret);
@@ -56,7 +56,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
     const savedToken = await Token.create(tokenData);
 
     if (!savedToken) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, "Token not saved");
+      throw new apiError(500, "Token not saved");
     }
 
     return {
@@ -68,7 +68,7 @@ const saveToken = async (token, userId, type, expires, revoked = false) => {
       revoked,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -87,11 +87,15 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
   try {
     payload = jwt.verify(token, secret);
   } catch (error) {
-    throw new apiError(status.UNAUTHORIZED, "Invalid or expired token");
+    // Preserve JWT error type for proper handling in auth middleware
+    if (error.name === 'TokenExpiredError') {
+      throw error; // Re-throw original JWT error
+    }
+    throw new apiError(401, "Invalid or expired token");
   }
 
   if (payload.type !== type) {
-    throw new apiError(status.UNAUTHORIZED, "Invalid token type");
+    throw new apiError(401, "Invalid token type");
   }
 
   if (payload.type === tokenTypes.REFRESH) {
@@ -105,20 +109,16 @@ const verifyToken = async (token, type, secret = config.jwt.secret) => {
       });
 
       if (!tokenRecord || new Date() > tokenRecord.expires) {
-        throw new apiError(status.UNAUTHORIZED, "Token not found or invalid");
+        throw new apiError(401, "Token not found or invalid");
       }
 
       return tokenRecord;
     } catch (error) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+      throw new apiError(500, error.message);
     }
   }
 
-  return {
-    token: token,
-    expires: payload.exp,
-    userId: payload.sub,
-  };
+  return payload;
 };
 
 /**
@@ -192,14 +192,14 @@ const revokeToken = async (token, userId) => {
 
     if (affectedRows === 0) {
       throw new apiError(
-        status.NOT_FOUND,
+        404,
         "Token not found or already revoked"
       );
     }
 
     return { message: "Token revoked successfully" };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -222,12 +222,12 @@ const revokeAllTokens = async (userId) => {
     );
 
     if (affectedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "No tokens found for this user");
+      throw new apiError(404, "No tokens found for this user");
     }
 
     return { message: "All tokens revoked successfully" };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -242,7 +242,7 @@ const refreshAuthToken = async (refreshToken) => {
   const tokenData = await verifyToken(refreshToken, tokenTypes.REFRESH);
 
   if (!tokenData) {
-    throw new apiError(status.UNAUTHORIZED, "Invalid refresh token");
+    throw new apiError(401, "Invalid refresh token");
   }
 
   const userId = tokenData.userId;
@@ -263,7 +263,7 @@ const resetPasswordToken = async (userId) => {
   const expires = day().add(
     config.jwt.resetPasswordExpirationMinutes,
     "minute"
-  );
+  ).toDate();
 
   const resetPasswordToken = await generateToken(
     userId,
@@ -273,7 +273,7 @@ const resetPasswordToken = async (userId) => {
 
   return {
     resetPasswordToken: resetPasswordToken,
-    expires: expires.toDate(),
+    expires: expires,
   };
 };
 
@@ -285,13 +285,13 @@ const resetPasswordToken = async (userId) => {
  */
 
 const generateAccessToken = async (userId) => {
-  const expires = day().add(config.jwt.accessExpirationMinutes, "minute");
+  const expires = day().add(config.jwt.accessExpirationMinutes, "minute").toDate();
 
   const accessToken = await generateToken(userId, tokenTypes.ACCESS, expires);
 
   return {
     accessToken: accessToken,
-    expires: expires.toDate(),
+    expires: expires,
   };
 };
 

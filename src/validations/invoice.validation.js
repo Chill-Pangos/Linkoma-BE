@@ -15,6 +15,19 @@ const createInvoice = {
   }),
 };
 
+const createInvoiceWithDetails = {
+  body: Joi.object().keys({
+    apartmentId: Joi.number().integer().positive().required(),
+    dueDate: Joi.date().required(),
+    serviceUsages: Joi.array().items(
+      Joi.object().keys({
+        serviceTypeId: Joi.number().integer().positive().required(),
+        usage: Joi.number().positive().required(),
+      })
+    ).required().min(1),
+  }),
+};
+
 const getInvoices = {
   query: Joi.object().keys({
     apartmentId: Joi.number().integer().positive(),
@@ -59,6 +72,7 @@ const deleteInvoice = {
 
 module.exports = {
   createInvoice,
+  createInvoiceWithDetails,
   getInvoices,
   getInvoice,
   updateInvoice,

@@ -1,6 +1,6 @@
 const { roles, roleRights } = require('../config/roles');
 const apiError = require('../utils/apiError');
-const { status } = require('http-status');
+const httpStatus = require('http-status');
 
 /**
  * @description Get all available roles
@@ -18,7 +18,7 @@ const getAllRoles = () => {
  */
 const getRolePermissions = (role) => {
   if (!roleRights.has(role)) {
-    throw new apiError(status.BAD_REQUEST, `Role '${role}' does not exist`);
+    throw new apiError(400, `Role '${role}' does not exist`);
   }
   return roleRights.get(role);
 };
@@ -54,7 +54,7 @@ const isValidRole = (role) => {
  */
 const assignRoleToUser = async (userId, role) => {
   if (!isValidRole(role)) {
-    throw new apiError(status.BAD_REQUEST, `Invalid role: ${role}`);
+    throw new apiError(400, `Invalid role: ${role}`);
   }
   
   // This would typically update a user-role mapping table or user record

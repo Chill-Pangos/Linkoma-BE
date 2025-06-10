@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const userFieldConfig = require("../config/fieldConfig/user.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus = require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -32,13 +32,13 @@ const createUser = async (userData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const user = await User.create(fields);
 
     if (!user) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, "User creation failed");
+      throw new apiError(500, "User creation failed");
     }
 
     await emailService.sendAccountEmail(
@@ -48,7 +48,7 @@ const createUser = async (userData) => {
 
     return { message: "User created successfully", userId: user.userId };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -63,18 +63,18 @@ const createUser = async (userData) => {
 const getUserById = async (userId) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(400, "User ID is required");
     }
 
     const user = await User.findByPk(userId);
     
     if (!user) {
-      throw new apiError(status.NOT_FOUND, "User not found");
+      throw new apiError(404, "User not found");
     }
 
     return user;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -96,7 +96,7 @@ const getUsers = async (limit, offset) => {
     });
 
     if (users.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No users found");
+      throw new apiError(404, "No users found");
     }
 
     const totalCount = await User.count();
@@ -107,7 +107,7 @@ const getUsers = async (limit, offset) => {
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -123,7 +123,7 @@ const getUsers = async (limit, offset) => {
 const updateUser = async (userId, userData) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(400, "User ID is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -139,7 +139,7 @@ const updateUser = async (userId, userData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await User.update(fields, {
@@ -147,12 +147,12 @@ const updateUser = async (userId, userData) => {
     });
 
     if (affectedRows === 0) {
-      throw new apiError(status.INTERNAL_SERVER_ERROR, "User update failed");
+      throw new apiError(500, "User update failed");
     }
 
     return { message: "User updated successfully", userId: userId };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -167,7 +167,7 @@ const updateUser = async (userId, userData) => {
 const deleteUser = async (userId) => {
   try {
     if (!userId) {
-      throw new apiError(status.BAD_REQUEST, "User ID is required");
+      throw new apiError(400, "User ID is required");
     }
 
     const deletedRows = await User.destroy({
@@ -175,12 +175,12 @@ const deleteUser = async (userId) => {
     });
 
     if (deletedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "User not found");
+      throw new apiError(404, "User not found");
     }
 
     return { message: "User deleted successfully" };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -195,7 +195,7 @@ const deleteUser = async (userId) => {
 const getUserByEmail = async (email) => {
   try {
     if(!email) {
-      throw new apiError(status.BAD_REQUEST, "Email is required");
+      throw new apiError(400, "Email is required");
     }
 
     const user = await User.findOne({
@@ -203,12 +203,12 @@ const getUserByEmail = async (email) => {
     });
 
     if (!user) {
-      throw new apiError(status.NOT_FOUND, "User not found");
+      throw new apiError(404, "User not found");
     }
 
     return user;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 }
 
@@ -229,7 +229,7 @@ const createUserWithEmail = async (email) => {
 
     if (existingUser) {
       throw new apiError(
-        status.CONFLICT,
+        409,
         "User with this email already exists"
       );
     }
@@ -266,7 +266,7 @@ const createUserWithEmail = async (email) => {
     if (error.isOperational) {
       throw error;
     }
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

@@ -99,15 +99,15 @@ InvoiceDetail.belongsTo(ServiceType, {
   as: 'serviceType'
 });
 
-// User - ServiceRegistration (One-to-Many)
-User.hasMany(ServiceRegistration, {
-  foreignKey: 'userId',
+// Apartment - ServiceRegistration (One-to-Many)
+Apartment.hasMany(ServiceRegistration, {
+  foreignKey: 'apartmentId',
   as: 'serviceRegistrations'
 });
 
-ServiceRegistration.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user'
+ServiceRegistration.belongsTo(Apartment, {
+  foreignKey: 'apartmentId',
+  as: 'apartment'
 });
 
 // ServiceType - ServiceRegistration (One-to-Many)

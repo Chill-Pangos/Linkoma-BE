@@ -6,7 +6,7 @@ const { serviceTypeService } = require('../services');
 
 const createServiceType = catchAsync(async (req, res) => {
   const serviceType = await serviceTypeService.createServiceType(req.body);
-  res.status(httpStatus.CREATED).send(serviceType);
+  res.status(201).send(serviceType);
 });
 
 const getServiceTypes = catchAsync(async (req, res) => {
@@ -19,7 +19,7 @@ const getServiceTypes = catchAsync(async (req, res) => {
 const getServiceType = catchAsync(async (req, res) => {
   const serviceType = await serviceTypeService.getServiceTypeById(req.params.serviceTypeId);
   if (!serviceType) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found');
+    throw new ApiError(404, 'Service type not found');
   }
   res.send(serviceType);
 });
@@ -31,7 +31,7 @@ const updateServiceType = catchAsync(async (req, res) => {
 
 const deleteServiceType = catchAsync(async (req, res) => {
   await serviceTypeService.deleteServiceType(req.params.serviceTypeId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 module.exports = {

@@ -218,7 +218,7 @@ module.exports = router;
  * /invoices/with-details:
  *   post:
  *     summary: Create an invoice with details
- *     description: Only users with manageInvoices permission can create invoices with details based on service registrations.
+ *     description: Only users with manageInvoices permission can create invoices with details based on provided service usages. Rent fee is automatically taken from apartment type.
  *     tags: [Invoices]
  *     security:
  *       - bearerAuth: []
@@ -235,23 +235,28 @@ module.exports = router;
  *             properties:
  *               apartmentId:
  *                 type: integer
- *               rentFee:
- *                 type: number
+ *                 description: ID of the apartment
  *               dueDate:
  *                 type: string
  *                 format: date
+ *                 description: Due date for the invoice
  *               serviceUsages:
  *                 type: array
+ *                 description: Array of service usage data
  *                 items:
  *                   type: object
+ *                   required:
+ *                     - serviceTypeId
+ *                     - usage
  *                   properties:
  *                     serviceTypeId:
  *                       type: integer
+ *                       description: ID of the service type
  *                     usage:
  *                       type: number
+ *                       description: Usage amount for this service
  *             example:
  *               apartmentId: 1
- *               rentFee: 1000
  *               dueDate: "2025-07-01"
  *               serviceUsages:
  *                 - serviceTypeId: 1
@@ -261,12 +266,46 @@ module.exports = router;
  *     responses:
  *       "201":
  *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 invoiceId:
+ *                   type: integer
+ *                 rentFee:
+ *                   type: number
+ *                 serviceFee:
+ *                   type: number
+ *                 totalAmount:
+ *                   type: number
+ *                 invoiceDetailsCount:
+ *                   type: integer
+ *                 serviceDetails:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       serviceName:
+ *                         type: string
+ *                       unit:
+ *                         type: string
+ *                       unitPrice:
+ *                         type: number
+ *                       usage:
+ *                         type: number
+ *                       totalAmount:
+ *                         type: number
  *       "400":
  *         $ref: '#/components/responses/BadRequest'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
