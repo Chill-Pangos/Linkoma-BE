@@ -84,9 +84,13 @@ const errorHandler = (err, req, res, next) => {
     ...(config.env === 'development' && { stack: err.stack })
   };
 
-  // Đảm bảo CORS headers được set cho React Native ngay cả khi có lỗi
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Set secure CORS headers for error responses
+  const origin = req.headers.origin;
+  if (origin) {
+    // Only set specific origin if it exists, never use wildcard with credentials
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   res.status(statusCode).json(response);
