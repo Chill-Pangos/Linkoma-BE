@@ -3,7 +3,7 @@ const authService = require("../services/auth.service");
 const userService = require("../services/user.service");
 const tokenService = require("../services/token.service");
 const emailService = require("../services/email.service");
-const { status } = require("http-status");
+const httpStatus = require("http-status");
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -17,7 +17,7 @@ const login = catchAsync(async (req, res) => {
     path: '/',
   })
 
-  res.status(status.OK).json({
+  res.status(200).json({
     user: user.user,
     accessToken: user.access,
   });
@@ -25,9 +25,6 @@ const login = catchAsync(async (req, res) => {
 
 const logout = catchAsync(async (req, res) => {
   const { refreshToken } = req.cookies;
-
-  console.log(refreshToken);
-  
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
@@ -37,7 +34,7 @@ const logout = catchAsync(async (req, res) => {
   });
   
   await authService.logout(refreshToken);
-  res.status(status.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
@@ -45,7 +42,7 @@ const forgotPassword = catchAsync(async (req, res) => {
   const resetToken = await authService.forgotPassword(email);
 
   await emailService.sendResetPasswordEmail(email, resetToken);
-  res.status(status.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 const resetPassword = catchAsync(async (req, res) => {
@@ -53,7 +50,7 @@ const resetPassword = catchAsync(async (req, res) => {
   const { password } = req.body;
 
   await authService.resetPassword(resetToken, password);
-  res.status(status.NO_CONTENT).json({});
+  res.status(204).json({});
 });
 
 module.exports = {

@@ -11,6 +11,7 @@ const routes = require("./routes/v1");
 const config = require("./config/config");
 const rateLimit = require("express-rate-limit");
 const { errorConverter, errorHandler } = require("./middlewares/error.middleware");
+const apiError = require("./utils/apiError");
 
 require("dotenv").config();
 
@@ -71,7 +72,6 @@ app.use('/v1', routes);
 
 // Handle 404 errors
 app.use((req, res, next) => {
-  const apiError = require("./utils/apiError");
   next(new apiError(404, 'Route not found'));
 });
 

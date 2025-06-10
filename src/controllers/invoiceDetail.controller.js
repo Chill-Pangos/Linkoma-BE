@@ -6,7 +6,7 @@ const { invoiceDetailService } = require('../services');
 
 const createInvoiceDetail = catchAsync(async (req, res) => {
   const invoiceDetail = await invoiceDetailService.createInvoiceDetail(req.body);
-  res.status(httpStatus.CREATED).send(invoiceDetail);
+  res.status(201).send(invoiceDetail);
 });
 
 const getInvoiceDetails = catchAsync(async (req, res) => {
@@ -19,7 +19,7 @@ const getInvoiceDetails = catchAsync(async (req, res) => {
 const getInvoiceDetail = catchAsync(async (req, res) => {
   const invoiceDetail = await invoiceDetailService.getInvoiceDetailById(req.params.invoiceDetailId);
   if (!invoiceDetail) {
-    throw new apiError(httpStatus.NOT_FOUND, 'Invoice detail not found');
+    throw new apiError(404, 'Invoice detail not found');
   }
   res.send(invoiceDetail);
 });
@@ -31,7 +31,7 @@ const updateInvoiceDetail = catchAsync(async (req, res) => {
 
 const deleteInvoiceDetail = catchAsync(async (req, res) => {
   await invoiceDetailService.deleteInvoiceDetail(req.params.invoiceDetailId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 module.exports = {

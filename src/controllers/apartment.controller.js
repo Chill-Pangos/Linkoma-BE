@@ -9,7 +9,7 @@ const apartmentService = require('../services/apartment.service');
  */
 const createApartment = catchAsync(async (req, res) => {
   const apartment = await apartmentService.createApartment(req.body);
-  res.status(httpStatus.CREATED).send(apartment);
+  res.status(201).send(apartment);
 });
 
 /**
@@ -48,7 +48,7 @@ const updateApartment = catchAsync(async (req, res) => {
  */
 const deleteApartment = catchAsync(async (req, res) => {
   await apartmentService.deleteApartmentById(req.params.apartmentId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 module.exports = {

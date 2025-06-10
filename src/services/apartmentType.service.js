@@ -1,7 +1,7 @@
 const ApartmentType = require("../models/apartmentType.model");
 const apartmentTypeFieldConfig = require("../config/fieldConfig/apartmentType.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -22,14 +22,14 @@ const createApartmentType = async (apartmentTypeData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const result = await ApartmentType.create(fields);
 
     if (!result) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Apartment type creation failed"
       );
     }
@@ -39,7 +39,7 @@ const createApartmentType = async (apartmentTypeData) => {
       apartmentTypeId: result.apartmentTypeId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -54,18 +54,18 @@ const createApartmentType = async (apartmentTypeData) => {
 const getApartmentTypeById = async (apartmentTypeId) => {
   try {
     if (!apartmentTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
+      throw new apiError(400, "Apartment type Id is required");
     }
 
     const apartmentType = await ApartmentType.findByPk(apartmentTypeId);
 
     if (!apartmentType) {
-      throw new apiError(status.NOT_FOUND, "Apartment type not found");
+      throw new apiError(404, "Apartment type not found");
     }
 
     return apartmentType;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -87,7 +87,7 @@ const getApartmentTypes = async (limit, offset) => {
     });
 
     if (apartmentTypes.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No apartment types found");
+      throw new apiError(404, "No apartment types found");
     }
 
     const totalCount = await ApartmentType.count();
@@ -98,7 +98,7 @@ const getApartmentTypes = async (limit, offset) => {
       currentPage: Math.ceil(offset / limit) + 1,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -114,7 +114,7 @@ const getApartmentTypes = async (limit, offset) => {
 const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
   try {
     if (!apartmentTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
+      throw new apiError(400, "Apartment type Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -125,7 +125,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await ApartmentType.update(fields, {
@@ -134,7 +134,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
 
     if (affectedRows === 0) {
       throw new apiError(
-        status.NOT_FOUND,
+        404,
         "Apartment type not found"
       );
     }
@@ -144,7 +144,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
       apartmentTypeId: apartmentTypeId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -159,7 +159,7 @@ const updateApartmentType = async (apartmentTypeId, apartmentTypeData) => {
 const deleteApartmentType = async (apartmentTypeId) => {
     try {
         if (!apartmentTypeId) {
-        throw new apiError(status.BAD_REQUEST, "Apartment type Id is required");
+        throw new apiError(400, "Apartment type Id is required");
         }
     
         const affectedRows = await ApartmentType.destroy({
@@ -167,12 +167,12 @@ const deleteApartmentType = async (apartmentTypeId) => {
         });
     
         if (affectedRows === 0) {
-        throw new apiError(status.NOT_FOUND, "Apartment type not found");
+        throw new apiError(404, "Apartment type not found");
         }
     
         return { message: "Apartment type deleted successfully" };
     } catch (error) {
-        throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+        throw new apiError(500, error.message);
     }
 }
 

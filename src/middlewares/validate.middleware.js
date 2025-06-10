@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus = require("http-status");
 
 /**
  * @description Middleware to validate request data against a Joi schema.
@@ -9,26 +9,43 @@ const { status } = require("http-status");
  * @throws {apiError} - Throws an error if validation fails.
  */
 
-const validate = (schema) => (req, res, next) => {
-  const validParts = ["body", "query", "params", "cookies"];
-
-  for (const part of validParts) {
-    if (schema[part]) {
-      const { error } = schema[part].validate(req[part], {
-        abortEarly: false, 
-        stripUnknown: true, 
-      });
-
-      if (error) {
-        const message = error.details
-          .map((detail) => detail.message)
-          .join(", ");
-        return next(new apiError(status.BAD_REQUEST, message));
+const validate = (schema) => {
+  return (req, res, next) => {
+    try {
+      if (!req) {
+        return next(new apiError(500, 'Request object is undefined'));
       }
-    }
-  }
 
-  next();
+      if (!schema) {
+        return next(new apiError(500, 'Validation schema is undefined'));
+      }
+
+      const validParts = ["body", "query", "params", "cookies"];
+
+      for (const part of validParts) {
+        if (schema[part]) {
+          // Ensure req[part] exists, provide empty object as default
+          const dataToValidate = req[part] || {};
+          
+          const { error } = schema[part].validate(dataToValidate, {
+            abortEarly: false, 
+            stripUnknown: true, 
+          });
+
+          if (error) {
+            const message = error.details
+              .map((detail) => detail.message)
+              .join(", ");
+            return next(new apiError(400, message));
+          }
+        }
+      }
+
+      next();
+    } catch (err) {
+      return next(new apiError(500, 'Validation middleware error: ' + err.message));
+    }
+  };
 };
 
 module.exports = validate;

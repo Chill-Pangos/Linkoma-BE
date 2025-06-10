@@ -1,7 +1,7 @@
 const ServiceType = require("../models/serviceType.model");
 const serviceTypeFieldConfig = require("../config/fieldConfig/serviceType.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
 
@@ -23,14 +23,14 @@ const createServiceType = async (serviceTypeData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const result = await ServiceType.create(fields);
 
     if (!result) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Service type creation failed"
       );
     }
@@ -40,7 +40,7 @@ const createServiceType = async (serviceTypeData) => {
       serviceTypeId: result.serviceTypeId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -54,18 +54,18 @@ const createServiceType = async (serviceTypeData) => {
 const getServiceTypeById = async (serviceTypeId) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
+      throw new apiError(400, "Service type Id is required");
     }
 
     const serviceType = await ServiceType.findByPk(serviceTypeId);
 
     if (!serviceType) {
-      throw new apiError(status.NOT_FOUND, "Service type not found");
+      throw new apiError(404, "Service type not found");
     }
 
     return serviceType;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -87,12 +87,12 @@ const getServiceTypes = async (limit, offset) => {
     });
 
     if (serviceTypes.length === 0) {
-      throw new apiError(status.NOT_FOUND, "No service types found");
+      throw new apiError(404, "No service types found");
     }
 
     return serviceTypes;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -106,7 +106,7 @@ const getServiceTypes = async (limit, offset) => {
 const updateServiceType = async (serviceTypeId, serviceTypeData) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
+      throw new apiError(400, "Service type Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -117,7 +117,7 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await ServiceType.update(fields, {
@@ -125,7 +125,7 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
     });
 
     if (affectedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Service type not found");
+      throw new apiError(404, "Service type not found");
     }
 
     return {
@@ -133,7 +133,7 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
       serviceTypeId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -147,7 +147,7 @@ const updateServiceType = async (serviceTypeId, serviceTypeData) => {
 const deleteServiceType = async (serviceTypeId) => {
   try {
     if (!serviceTypeId) {
-      throw new apiError(status.BAD_REQUEST, "Service type Id is required");
+      throw new apiError(400, "Service type Id is required");
     }
 
     const affectedRows = await ServiceType.destroy({
@@ -155,7 +155,7 @@ const deleteServiceType = async (serviceTypeId) => {
     });
 
     if (affectedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Service type not found");
+      throw new apiError(404, "Service type not found");
     }
 
     return {
@@ -163,7 +163,7 @@ const deleteServiceType = async (serviceTypeId) => {
       serviceTypeId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -217,7 +217,7 @@ const queryServiceTypes = async (filter, options) => {
       totalResults: count,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

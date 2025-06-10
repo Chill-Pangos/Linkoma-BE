@@ -1,7 +1,7 @@
 const Announcement = require("../models/announcement.model");
 const announcementFieldConfig = require("../config/fieldConfig/announcement.fieldconfig");
 const apiError = require("../utils/apiError");
-const { status } = require("http-status");
+const httpStatus= require("http-status");
 const filterValidFields = require("../utils/filterValidFields");
 
 /**
@@ -23,14 +23,14 @@ const createAnnouncement = async (announcementData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const announcement = await Announcement.create(fields);
 
     if (!announcement) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Announcement creation failed"
       );
     }
@@ -40,7 +40,7 @@ const createAnnouncement = async (announcementData) => {
       announcementId: announcement.announcementId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -56,18 +56,18 @@ const createAnnouncement = async (announcementData) => {
 const getAnnouncementById = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
+      throw new apiError(400, "Announcement Id is required");
     }
 
     const announcement = await Announcement.findByPk(announcementId);
 
     if (!announcement) {
-      throw new apiError(status.NOT_FOUND, "Announcement not found");
+      throw new apiError(404, "Announcement not found");
     }
 
     return announcement;
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -114,7 +114,7 @@ const getAnnouncements = async (limit, offset, filters = {}, sortBy = 'createdAt
       totalResults: count,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -131,7 +131,7 @@ const getAnnouncements = async (limit, offset, filters = {}, sortBy = 'createdAt
 const updateAnnouncement = async (announcementId, announcementData) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
+      throw new apiError(400, "Announcement Id is required");
     }
 
     const fields = filterValidFields.filterValidFieldsFromObject(
@@ -142,7 +142,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
     const entries = Object.entries(fields);
 
     if (entries.length === 0) {
-      throw new apiError(status.BAD_REQUEST, "No valid fields provided");
+      throw new apiError(400, "No valid fields provided");
     }
 
     const [affectedRows] = await Announcement.update(fields, {
@@ -151,7 +151,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
 
     if (affectedRows === 0) {
       throw new apiError(
-        status.INTERNAL_SERVER_ERROR,
+        500,
         "Announcement update failed"
       );
     }
@@ -161,7 +161,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
       announcementId: announcementId,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -177,7 +177,7 @@ const updateAnnouncement = async (announcementId, announcementData) => {
 const deleteAnnouncement = async (announcementId) => {
   try {
     if (!announcementId) {
-      throw new apiError(status.BAD_REQUEST, "Announcement Id is required");
+      throw new apiError(400, "Announcement Id is required");
     }
 
     const deletedRows = await Announcement.destroy({
@@ -185,14 +185,14 @@ const deleteAnnouncement = async (announcementId) => {
     });
 
     if (deletedRows === 0) {
-      throw new apiError(status.NOT_FOUND, "Announcement not found");
+      throw new apiError(404, "Announcement not found");
     }
 
     return {
       message: "Announcement deleted successfully",
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

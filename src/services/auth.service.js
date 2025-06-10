@@ -1,6 +1,6 @@
 const apiError = require("../utils/apiError");
 const User = require("../models/user.model");
-const { status } = require("http-status");
+const httpStatus = require("http-status");
 const bcrypt = require("bcryptjs");
 const userService = require("./user.service");
 const { tokenTypes } = require("../config/tokens");
@@ -20,34 +20,37 @@ const config = require("../config/config");
 const login = async (email, password) => {
   try {
     if (!email || !password) {
-      throw new apiError(status.BAD_REQUEST, "Email and password are required");
+      throw new apiError(400, "Email and password are required");
     }
 
     const user = await userService.getUserByEmail(email);
 
     if (!user) {
-      throw new apiError(status.UNAUTHORIZED, "Invalid email");
+      throw new apiError(401, "Invalid email");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new apiError(status.UNAUTHORIZED, "Invalid password");
+      throw new apiError(401, "Invalid password");
     }
 
+    const Tokens = await tokenService.generateAuthTokens(user.userId);
+
     return {
-      user: user,
-      ...(await tokenService.generateAuthTokens(user.userId)),
+      user: user, 
+      access: Tokens.access,  
+      refresh: Tokens.refresh,
     };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
 const logout = async (refreshToken) => {
   try {
     if (!refreshToken) {
-      throw new apiError(status.BAD_REQUEST, "Refresh token is required");
+      throw new apiError(400, "Refresh token is required");
     }
 
     const tokenData = await tokenService.verifyToken(
@@ -56,7 +59,7 @@ const logout = async (refreshToken) => {
     );
 
     if (!tokenData) {
-      throw new apiError(status.UNAUTHORIZED, "Invalid refresh token");
+      throw new apiError(401, "Invalid refresh token");
     }
 
     await tokenService.revokeToken(
@@ -66,7 +69,7 @@ const logout = async (refreshToken) => {
 
     return { message: "Logged out successfully" };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -81,18 +84,18 @@ const logout = async (refreshToken) => {
 const forgotPassword = async (email) => {
   try {
     if (!email) {
-      throw new apiError(status.BAD_REQUEST, "Email is required");
+      throw new apiError(400, "Email is required");
     }
 
     const user = await userService.getUserByEmail(email);
 
     if (!user) {
-      throw new apiError(status.NOT_FOUND, "User not found");
+      throw new apiError(404, "User not found");
     }
 
     return await tokenService.resetPasswordToken(user.userId);
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 
@@ -109,7 +112,7 @@ const resetPassword = async (resetToken, password) => {
   try {
     if (!resetToken || !password) {
       throw new apiError(
-        status.BAD_REQUEST,
+        400,
         "Reset token and password are required"
       );
     }
@@ -120,13 +123,13 @@ const resetPassword = async (resetToken, password) => {
     );
 
     if (!tokenData) {
-      throw new apiError(status.UNAUTHORIZED, "Invalid reset token");
+      throw new apiError(401, "Invalid reset token");
     }
 
     const user = await userService.getUserById(tokenData.userId);
 
     if (!user) {
-      throw new apiError(status.NOT_FOUND, "User not found");
+      throw new apiError(404, "User not found");
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -135,7 +138,7 @@ const resetPassword = async (resetToken, password) => {
 
     return { message: "Password reset successfully" };
   } catch (error) {
-    throw new apiError(status.INTERNAL_SERVER_ERROR, error.message);
+    throw new apiError(500, error.message);
   }
 };
 

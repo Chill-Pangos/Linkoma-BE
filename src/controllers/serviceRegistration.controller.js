@@ -6,7 +6,7 @@ const { serviceRegistrationService } = require('../services');
 
 const createServiceRegistration = catchAsync(async (req, res) => {
   const serviceRegistration = await serviceRegistrationService.createServiceRegistration(req.body);
-  res.status(httpStatus.CREATED).send(serviceRegistration);
+  res.status(201).send(serviceRegistration);
 });
 
 const getServiceRegistrations = catchAsync(async (req, res) => {
@@ -19,7 +19,7 @@ const getServiceRegistrations = catchAsync(async (req, res) => {
 const getServiceRegistration = catchAsync(async (req, res) => {
   const serviceRegistration = await serviceRegistrationService.getServiceRegistrationById(req.params.serviceRegistrationId);
   if (!serviceRegistration) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Service registration not found');
+    throw new ApiError(404, 'Service registration not found');
   }
   res.send(serviceRegistration);
 });
@@ -31,7 +31,7 @@ const updateServiceRegistration = catchAsync(async (req, res) => {
 
 const deleteServiceRegistration = catchAsync(async (req, res) => {
   await serviceRegistrationService.deleteServiceRegistration(req.params.serviceRegistrationId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 module.exports = {

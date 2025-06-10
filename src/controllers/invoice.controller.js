@@ -6,12 +6,12 @@ const { invoiceService } = require('../services');
 
 const createInvoice = catchAsync(async (req, res) => {
   const invoice = await invoiceService.createInvoice(req.body);
-  res.status(httpStatus.CREATED).send(invoice);
+  res.status(201).send(invoice);
 });
 
 const createInvoiceWithDetails = catchAsync(async (req, res) => {
   const invoice = await invoiceService.createInvoiceWithDetails(req.body);
-  res.status(httpStatus.CREATED).send(invoice);
+  res.status(201).send(invoice);
 });
 
 const getInvoices = catchAsync(async (req, res) => {
@@ -24,7 +24,7 @@ const getInvoices = catchAsync(async (req, res) => {
 const getInvoice = catchAsync(async (req, res) => {
   const invoice = await invoiceService.getInvoiceById(req.params.invoiceId);
   if (!invoice) {
-    throw new apiError(httpStatus.NOT_FOUND, 'Invoice not found');
+    throw new apiError(404, 'Invoice not found');
   }
   res.send(invoice);
 });
@@ -36,7 +36,7 @@ const updateInvoice = catchAsync(async (req, res) => {
 
 const deleteInvoice = catchAsync(async (req, res) => {
   await invoiceService.deleteInvoice(req.params.invoiceId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(204).send();
 });
 
 module.exports = {
