@@ -87,9 +87,28 @@ const errorHandler = (err, req, res, next) => {
   // Set secure CORS headers for error responses
   const origin = req.headers.origin;
   if (origin) {
-    // Only set specific origin if it exists, never use wildcard with credentials
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    // Validate origin before setting it to prevent CORS misconfiguration
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:19000',
+      'http://localhost:19006',
+      'http://localhost:8081',
+      'http://10.0.2.2:8081',
+      'http://10.0.2.2:3000',
+      'http://10.0.2.2:19000',
+      config.frontendUrl
+    ].filter(Boolean);
+    
+    // Check if origin is localhost or in allowed list
+    const isLocalhost = origin.match(/^https?:\/\/localhost:\d+$/);
+    const isLocalNetwork = origin.match(/^https?:\/\/192\.168\.\d+\.\d+:\d+$/);
+    const isAndroidEmulator = origin.match(/^https?:\/\/10\.0\.2\.\d+:\d+$/);
+    const isAllowed = allowedOrigins.includes(origin);
+    
+    if (isLocalhost || isLocalNetwork || isAndroidEmulator || isAllowed) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
   }
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
