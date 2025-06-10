@@ -19,18 +19,49 @@ const app = express();
 // Trust proxy to handle X-Forwarded-For headers properly for rate limiting
 app.set('trust proxy', 1);
 
-// enable CORS
+// Enhanced CORS for React Native compatibility
 app.use(cors({
   origin: true,
   credentials: true,
-  exposedHeaders: ['Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With', 
+    'Content-Type', 
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'Pragma',
+    'User-Agent'
+  ],
+  exposedHeaders: [
+    'Authorization', 
+    'X-Total-Count',
+    'Content-Range'
+  ],
 }));
+
 app.options(
   /(.*)/,
   cors({
     origin: true,
     credentials: true,
-    exposedHeaders: ['Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With', 
+      'Content-Type', 
+      'Accept',
+      'Authorization',
+      'Cache-Control',
+      'Pragma',
+      'User-Agent'
+    ],
+    exposedHeaders: [
+      'Authorization', 
+      'X-Total-Count',
+      'Content-Range'
+    ],
   })
 );
 
@@ -43,12 +74,32 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Security headers 
-app.use(helmet());
+// Security headers optimized for React Native
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // Body parsers
 app.use(express.json());                         
 app.use(express.urlencoded({ extended: true })); 
+
+// React Native compatibility middleware
+app.use((req, res, next) => {
+  // Set additional headers for React Native apps
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Handle JSON responses for React Native
+  const originalJson = res.json;
+  res.json = function(obj) {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return originalJson.call(this, obj);
+  };
+  
+  next();
+});
 
 // Cookie parser 
 app.use(cookieParser());
