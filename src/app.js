@@ -19,9 +19,48 @@ const app = express();
 // Trust proxy to handle X-Forwarded-For headers properly for rate limiting
 app.set('trust proxy', 1);
 
-// Enhanced CORS for React Native compatibility
+// Enhanced CORS for React Native compatibility - secure configuration
 app.use(cors({
-  origin: true,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, React Native)
+    if (!origin) return callback(null, true);
+    
+    // In development, allow localhost and common React Native origins
+    if (config.env === 'development') {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:19000', // Expo
+        'http://localhost:19006', // Expo web
+        'http://localhost:8081',  // Metro bundler
+        'http://10.0.2.2:8081',   // Android emulator
+        'http://10.0.2.2:3000',   // Android emulator
+        'http://10.0.2.2:19000',  // Android emulator Expo
+      ];
+      
+      // Allow localhost with any port
+      if (origin.match(/^https?:\/\/localhost:\d+$/)) {
+        return callback(null, true);
+      }
+      
+      // Allow local network IPs for React Native development
+      if (origin.match(/^https?:\/\/192\.168\.\d+\.\d+:\d+$/)) {
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+    }
+    
+    // In production, only allow specific origins
+    const productionOrigins = [config.frontendUrl].filter(Boolean);
+    if (productionOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Reject unknown origins in production
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
   allowedHeaders: [
@@ -44,7 +83,46 @@ app.use(cors({
 app.options(
   /(.*)/,
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, React Native)
+      if (!origin) return callback(null, true);
+      
+      // In development, allow localhost and common React Native origins
+      if (config.env === 'development') {
+        const allowedOrigins = [
+          'http://localhost:3000',
+          'http://localhost:19000', // Expo
+          'http://localhost:19006', // Expo web
+          'http://localhost:8081',  // Metro bundler
+          'http://10.0.2.2:8081',   // Android emulator
+          'http://10.0.2.2:3000',   // Android emulator
+          'http://10.0.2.2:19000',  // Android emulator Expo
+        ];
+        
+        // Allow localhost with any port
+        if (origin.match(/^https?:\/\/localhost:\d+$/)) {
+          return callback(null, true);
+        }
+        
+        // Allow local network IPs for React Native development
+        if (origin.match(/^https?:\/\/192\.168\.\d+\.\d+:\d+$/)) {
+          return callback(null, true);
+        }
+        
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+      }
+      
+      // In production, only allow specific origins
+      const productionOrigins = [config.frontendUrl].filter(Boolean);
+      if (productionOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Reject unknown origins in production
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
