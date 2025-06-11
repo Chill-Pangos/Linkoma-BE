@@ -61,6 +61,24 @@ router
   );
 
 router
+  .route('/role/:role')
+  .get(
+    userLimiter,
+    auth('getUsers'),
+    validate(userValidation.getUsersByRole),
+    userController.getUsersByRole
+  );
+
+router
+  .route('/stats/count-by-role')
+  .get(
+    userLimiter,
+    auth('getUsers'),
+    validate(userValidation.getUserCountByRole),
+    userController.getUserCountByRole
+  );
+
+router
   .route('/:userId')
   .get(
     userLimiter,
@@ -270,6 +288,74 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *       "404":
  *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /users/role/{role}:
+ *   get:
+ *     summary: Get users by role
+ *     description: Only admins can fetch users by role.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: role
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [admin, employee, resident]
+ *         description: User role
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 totalPages:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /users/stats/count-by-role:
+ *   get:
+ *     summary: Get user count by role
+ *     description: Only admins can fetch user count by role.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admin:
+ *                   type: integer
+ *                 employee:
+ *                   type: integer
+ *                 resident:
+ *                   type: integer
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**

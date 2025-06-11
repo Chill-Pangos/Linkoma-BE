@@ -22,6 +22,7 @@ const getUsers = {
   query: Joi.object().keys({
     page: Joi.number().integer().min(1).optional(),
     limit: Joi.number().integer().min(1).max(100).optional(),
+    role: Joi.string().valid('admin', 'manager', 'resident').optional(),
   }),
 };
 
@@ -70,12 +71,28 @@ const createUserWithEmail = {
   }),
 };
 
+const getUsersByRole = {
+  params: Joi.object().keys({
+    role: Joi.string().valid('admin', 'manager', 'resident').required(),
+  }),
+  query: Joi.object().keys({
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).max(100).optional(),
+  }),
+};
+
+const getUserCountByRole = {
+  // No validation needed for this endpoint
+};
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
-  getUserByEmail,
   updateUser,
   deleteUser,
+  getUserByEmail,
   createUserWithEmail,
+  getUsersByRole,
+  getUserCountByRole,
 };
