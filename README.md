@@ -1,2 +1,25 @@
-# Linkoma-BE
- Linkoma-BE is the backend for a mini apartment management system, providing features for managing residents, apartments, parking spaces, invoices, service fees, and resident requests/feedback. It includes role-based access control, security, reporting, and notifications, ensuring efficient and secure management of the apartment complex.
+## Cách chạy project
+
+### 1. Cài đặt dependencies
+```bash
+yarn install
+# hoặc
+npm install
+```
+
+### 2. Tạo file `.env`
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=linkoma_db
+DB_USER=root
+DB_PASSWORD=yourpassword
+JWT_SECRET=your_jwt_secret
+```
+
+### 3. Chạy project
+```bash
+yarn dev
+# hoặc
+npm run dev
+```
