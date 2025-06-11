@@ -11,13 +11,13 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 /**
- * Get all users
+ * Get all users with optional role filter
  */
 const getUsers = catchAsync(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, role } = req.query;
   const offset = (page - 1) * limit;
   
-  const result = await userService.getUsers(parseInt(limit), parseInt(offset));
+  const result = await userService.getUsers(parseInt(limit), parseInt(offset), role);
   res.send(result);
 });
 
@@ -61,6 +61,33 @@ const createUserWithEmail = catchAsync(async (req, res) => {
   res.status(201).send(user);
 });
 
+/**
+ * Get users by role
+ */
+const getUsersByRole = catchAsync(async (req, res) => {
+  const { role } = req.params;
+  const { page, limit } = req.query;
+  
+  let offset = null;
+  let parsedLimit = null;
+  
+  if (page && limit) {
+    parsedLimit = parseInt(limit);
+    offset = (parseInt(page) - 1) * parsedLimit;
+  }
+  
+  const result = await userService.getUsersByRole(role, parsedLimit, offset);
+  res.send(result);
+});
+
+/**
+ * Get user count by role
+ */
+const getUserCountByRole = catchAsync(async (req, res) => {
+  const result = await userService.getUserCountByRole();
+  res.send(result);
+});
+
 module.exports = {
   createUser,
   getUsers,
@@ -69,4 +96,6 @@ module.exports = {
   deleteUser,
   getUserByEmail,
   createUserWithEmail,
+  getUsersByRole,
+  getUserCountByRole,
 };

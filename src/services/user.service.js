@@ -79,34 +79,55 @@ const getUserById = async (userId) => {
 };
 
 /**
- * @description Get all users with pagination
+ * @description Get all users with pagination and optional role filter
  *
  * @param {number} limit - The number of users to retrieve
  * @param {number} offset - The offset for pagination
+ * @param {string} role - Optional role to filter by (admin, manager, resident)
  * @return {Array} - The list of users
  * @throws {apiError} - If there is an error during the retrieval
  */
 
-const getUsers = async (limit, offset) => {
+const getUsers = async (limit, offset, role = null) => {
   try {
+    // Build where clause for filtering
+    const whereClause = {};
+    
+    if (role) {
+      // Validate role
+      const validRoles = ['admin', 'manager', 'resident'];
+      if (!validRoles.includes(role)) {
+        throw new apiError(400, `Invalid role. Must be one of: ${validRoles.join(', ')}`);
+      }
+      whereClause.role = role;
+    }
+
     const users = await User.findAll({
+      where: whereClause,
       limit: limit,
       offset: offset,
       order: [['userId', 'ASC']]
     });
 
     if (users.length === 0) {
-      throw new apiError(404, "No users found");
+      throw new apiError(404, role ? `No users found with role: ${role}` : "No users found");
     }
 
-    const totalCount = await User.count();
+    const totalCount = await User.count({
+      where: whereClause
+    });
 
     return {
       data: users,
       totalPages: Math.ceil(totalCount / limit),
       currentPage: Math.ceil(offset / limit) + 1,
+      totalCount: totalCount,
+      ...(role && { filterBy: { role } })
     };
   } catch (error) {
+    if (error instanceof apiError) {
+      throw error;
+    }
     throw new apiError(500, error.message);
   }
 };
@@ -270,6 +291,92 @@ const createUserWithEmail = async (email) => {
   }
 };
 
+/**
+ * @description Get users by specific role
+ *
+ * @param {string} role - The role to filter by (admin, manager, resident)
+ * @param {number} limit - The number of users to retrieve (optional)
+ * @param {number} offset - The offset for pagination (optional)
+ * @return {Array} - The list of users with specified role
+ * @throws {apiError} - If there is an error during the retrieval
+ */
+
+const getUsersByRole = async (role, limit = null, offset = null) => {
+  try {
+    const validRoles = ['admin', 'manager', 'resident'];
+    if (!validRoles.includes(role)) {
+      throw new apiError(400, `Invalid role. Must be one of: ${validRoles.join(', ')}`);
+    }
+
+    const queryOptions = {
+      where: { role },
+      order: [['userId', 'ASC']]
+    };
+
+    if (limit !== null) {
+      queryOptions.limit = limit;
+    }
+
+    if (offset !== null) {
+      queryOptions.offset = offset;
+    }
+
+    const users = await User.findAll(queryOptions);
+
+    if (users.length === 0) {
+      throw new apiError(404, `No users found with role: ${role}`);
+    }
+
+    const totalCount = await User.count({
+      where: { role }
+    });
+
+    const result = {
+      data: users,
+      totalCount: totalCount,
+      role: role
+    };
+
+    if (limit !== null) {
+      result.totalPages = Math.ceil(totalCount / limit);
+      result.currentPage = offset !== null ? Math.ceil(offset / limit) + 1 : 1;
+    }
+
+    return result;
+  } catch (error) {
+    if (error instanceof apiError) {
+      throw error;
+    }
+    throw new apiError(500, error.message);
+  }
+};
+
+/**
+ * @description Get count of users by role
+ *
+ * @return {Object} - Object containing count for each role
+ * @throws {apiError} - If there is an error during the retrieval
+ */
+
+const getUserCountByRole = async () => {
+  try {
+    const [adminCount, managerCount, residentCount] = await Promise.all([
+      User.count({ where: { role: 'admin' } }),
+      User.count({ where: { role: 'manager' } }),
+      User.count({ where: { role: 'resident' } })
+    ]);
+
+    return {
+      admin: adminCount,
+      manager: managerCount,
+      resident: residentCount,
+      total: adminCount + managerCount + residentCount
+    };
+  } catch (error) {
+    throw new apiError(500, error.message);
+  }
+};
+
 module.exports = {
   createUser,
   getUserById,
@@ -277,5 +384,7 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserByEmail,
-  createUserWithEmail
+  createUserWithEmail,
+  getUsersByRole,
+  getUserCountByRole
 };
