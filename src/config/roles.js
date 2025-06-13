@@ -64,6 +64,7 @@ const allRoles = {
     "managePermissions",
     "viewAnnouncements",
     "viewReports",
+    'respondToFeedbacks',
     "systemConfig",
   ],
 };

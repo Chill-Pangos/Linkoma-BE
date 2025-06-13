@@ -27,7 +27,7 @@ const Feedback = db.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM("Pending", "In Progress", "Resolved", "Rejected"),
+      type: DataTypes.ENUM("Pending", "In Progress", "Resolved", "Rejected", "Cancelled"),
       allowNull: false,
       defaultValue: "Pending",
     },

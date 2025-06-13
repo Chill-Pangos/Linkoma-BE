@@ -80,14 +80,11 @@ const getFeedbackById = async (feedbackId) => {
 
 const getFeedbacks = async (limit = 10, offset = 0, filters = {}, sortBy = 'createdAt:desc') => {
   try {
-    
-    // Build where clause from filters
     const where = {};
     if (filters.userId) where.userId = filters.userId;
     if (filters.category) where.category = filters.category;
     if (filters.status) where.status = filters.status;
     
-    // Parse sortBy (e.g., 'createdAt:desc' -> ['createdAt', 'DESC'])
     let order = [['createdAt', 'DESC']];
     if (sortBy) {
       const [field, direction = 'ASC'] = sortBy.split(':');
@@ -117,7 +114,7 @@ const getFeedbacks = async (limit = 10, offset = 0, filters = {}, sortBy = 'crea
 };
 
 /**
- * @description Update feedback by Id
+ * @description Update feedback by Id by admin
  * @param {number} feedbackId - The Id of the feedback to be updated
  * @param {Object} feedbackData - The new feedback data
  * @return {Object} - The result of the update
@@ -141,6 +138,11 @@ const updateFeedback = async (feedbackId, feedbackData) => {
       throw new apiError(400, "No valid fields provided");
     }
 
+    if((!fields.category || !fields.category?.trim()) && (!fields.description || !fields.description?.trim())) {
+      const currentDate = new Date().toISOString().split('T')[0]; 
+      fields.responseDate = currentDate;
+    }
+
     const [affectedRows] = await Feedback.update(fields, {
       where: { feedbackId: feedbackId }
     });
@@ -154,7 +156,6 @@ const updateFeedback = async (feedbackId, feedbackData) => {
 
     return {
       message: "Feedback updated successfully",
-      feedbackId: feedbackId,
     };
   } catch (error) {
     throw new apiError(500, error.message);
@@ -190,6 +191,10 @@ const deleteFeedback = async (feedbackId) => {
     throw new apiError(500, error.message);
   }
 };
+
+const updateFeedbackByResident = async (feedbackId, feedbackData) => {
+
+}
 
 module.exports = {
   createFeedback,

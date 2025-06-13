@@ -29,18 +29,26 @@ const getFeedback = {
   }),
 };
 
-const updateFeedback = {
+const updateFeedbackByAdmin = {
   params: Joi.object().keys({
     feedbackId: Joi.number().integer().required(),
   }),
   body: Joi.object()
     .keys({
-      userId: Joi.number().integer(),
-      category: Joi.string().valid('Maintenance', 'Service', 'Complaint'),
-      description: Joi.string(),
       status: Joi.string().valid('Pending', 'In Progress', 'Resolved', 'Rejected'),
       response: Joi.string(),
-      responseDate: Joi.date(),
+    })
+    .min(1),
+};
+
+const updateFeedbackByResident = {
+  params: Joi.object().keys({
+    feedbackId: Joi.number().integer().required(),
+  }),
+  body: Joi.object()
+    .keys({
+      category: Joi.string().valid('Maintenance', 'Service', 'Complaint'),
+      description: Joi.string(),
     })
     .min(1),
 };
@@ -57,7 +65,7 @@ const getUserFeedbacks = {
   }),
   query: Joi.object().keys({
     category: Joi.string().valid('Maintenance', 'Service', 'Complaint'),
-    status: Joi.string().valid('Pending', 'In Progress', 'Resolved', 'Rejected'),
+    status: Joi.string().valid('Pending', 'In Progress', 'Resolved', 'Rejected', 'Cancelled'),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
@@ -68,7 +76,8 @@ module.exports = {
   createFeedback,
   getFeedbacks,
   getFeedback,
-  updateFeedback,
+  updateFeedbackByAdmin,
+  updateFeedbackByResident,
   deleteFeedback,
   getUserFeedbacks,
 };
