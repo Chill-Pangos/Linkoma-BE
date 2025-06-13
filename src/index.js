@@ -15,7 +15,6 @@ async function checkConnection() {
 }
 
 checkConnection().then(() => {
-  
   app.listen(config.port, () => {
     console.log(`Server is running on port ${config.port}`);
   });

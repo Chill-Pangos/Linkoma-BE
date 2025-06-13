@@ -1,9 +1,9 @@
-const express = require('express');
-const auth = require('../../middlewares/auth.middleware');
-const validate = require('../../middlewares/validate.middleware');
-const feedbackValidation = require('../../validations/feedback.validation');
-const feedbackController = require('../../controllers/feedback.controller');
-const rateLimit = require('express-rate-limit');
+const express = require("express");
+const auth = require("../../middlewares/auth.middleware");
+const validate = require("../../middlewares/validate.middleware");
+const feedbackValidation = require("../../validations/feedback.validation");
+const feedbackController = require("../../controllers/feedback.controller");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 
@@ -28,47 +28,56 @@ const createFeedbackLimiter = rateLimit({
 });
 
 router
-  .route('/')
+  .route("/")
   .post(
     createFeedbackLimiter,
-    auth('manageFeedbacks'),
-    validate(feedbackValidation.createFeedback), 
+    auth("manageFeedbacks"),
+    validate(feedbackValidation.createFeedback),
     feedbackController.createFeedback
   )
   .get(
     feedbackLimiter,
-    auth('getFeedbacks'),
-    validate(feedbackValidation.getFeedbacks), 
+    auth("getFeedbacks"),
+    validate(feedbackValidation.getFeedbacks),
     feedbackController.getFeedbacks
   );
 
 router
-  .route('/:feedbackId')
+  .route("/:feedbackId")
   .get(
     feedbackLimiter,
-    auth('getFeedbacks'),
-    validate(feedbackValidation.getFeedback), 
+    auth("getFeedbacks"),
+    validate(feedbackValidation.getFeedback),
     feedbackController.getFeedback
   )
   .patch(
     feedbackLimiter,
-    auth('manageFeedbacks'),
-    validate(feedbackValidation.updateFeedback), 
+    auth("manageFeedbacks"),
+    validate(feedbackValidation.updateFeedbackByResident),
     feedbackController.updateFeedback
   )
   .delete(
     feedbackLimiter,
-    auth('manageFeedbacks'),
-    validate(feedbackValidation.deleteFeedback), 
+    auth("manageFeedbacks"),
+    validate(feedbackValidation.deleteFeedback),
     feedbackController.deleteFeedback
   );
 
 router
-  .route('/user/:userId')
+  .route("/feedbackresponse/:feedbackId")
+  .patch(
+    feedbackLimiter,
+    auth("respondToFeedbacks"),
+    validate(feedbackValidation.updateFeedbackByAdmin),
+    feedbackController.updateFeedback
+  );
+
+router
+  .route("/user/:userId")
   .get(
     feedbackLimiter,
-    auth('getFeedbacks'),
-    validate(feedbackValidation.getUserFeedbacks), 
+    auth("getFeedbacks"),
+    validate(feedbackValidation.getUserFeedbacks),
     feedbackController.getUserFeedbacks
   );
 
@@ -105,12 +114,12 @@ module.exports = router;
  *                 type: integer
  *               category:
  *                 type: string
- *                 enum: [Maintenance, Service, Complaint]
+ *                 enum: ["Maintenance", "Service", "Complaint"]
  *               description:
  *                 type: string
  *               status:
  *                 type: string
- *                 enum: [Pending, In Progress, Resolved, Rejected]
+ *                 enum: ["Pending", "In Progress", "Resolved", "Rejected"]
  *               response:
  *                 type: string
  *               responseDate:
@@ -118,9 +127,9 @@ module.exports = router;
  *                 format: date
  *             example:
  *               userId: 1
- *               category: Maintenance
+ *               category: "Maintenance"
  *               description: "Air conditioner not working properly"
- *               status: Pending
+ *               status: "Pending"
  *     responses:
  *       "201":
  *         description: Created
@@ -139,7 +148,6 @@ module.exports = router;
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
- *
  *   get:
  *     summary: Get all feedbacks
  *     description: Only users with getFeedbacks permission can retrieve feedbacks.
@@ -162,7 +170,7 @@ module.exports = router;
  *         name: status
  *         schema:
  *           type: string
- *           enum: [Pending, In Progress, Resolved, Rejected]
+ *           enum: [Pending, In Progress, Resolved, Rejected, Cancelled]
  *         description: Filter by status
  *       - in: query
  *         name: sortBy
@@ -263,25 +271,14 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               userId:
- *                 type: integer
  *               category:
  *                 type: string
  *                 enum: [Maintenance, Service, Complaint]
  *               description:
  *                 type: string
- *               status:
- *                 type: string
- *                 enum: [Pending, In Progress, Resolved, Rejected]
- *               response:
- *                 type: string
- *               responseDate:
- *                 type: string
- *                 format: date
  *             example:
- *               status: Resolved
- *               response: "Issue has been fixed"
- *               responseDate: "2023-01-01"
+ *               category: Maintenance
+ *               description: "Updated description of the feedback"
  *     responses:
  *       "200":
  *         description: OK
@@ -297,7 +294,6 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *       "404":
  *         $ref: '#/components/responses/NotFound'
- *
  *   delete:
  *     summary: Delete a feedback
  *     description: Only users with manageFeedbacks permission can delete feedbacks.
@@ -348,7 +344,7 @@ module.exports = router;
  *         name: status
  *         schema:
  *           type: string
- *           enum: [Pending, In Progress, Resolved, Rejected]
+ *           enum: [Pending, In Progress, Resolved, Rejected, Cancelled]
  *         description: Filter by status
  *       - in: query
  *         name: sortBy
@@ -393,6 +389,54 @@ module.exports = router;
  *                 totalResults:
  *                   type: integer
  *                   example: 1
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /feedbacks/feedbackresponse/{feedbackId}:
+ *   patch:
+ *     summary: Update feedback response by admin
+ *     description: Only users with respondToFeedbacks permission can update feedback responses.
+ *     tags: [Feedbacks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: feedbackId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Feedback ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Pending, In Progress, Resolved, Rejected, Cancelled]
+ *               response:
+ *                 type: string
+ *             example:
+ *               status: "Resolved"
+ *               response: "Issue has been resolved"
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Feedback'
+ *       "400":
+ *         $ref: '#/components/responses/BadRequest'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
