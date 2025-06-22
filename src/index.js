@@ -1,12 +1,12 @@
 const app = require("./app");
 const config = require("./config/config");
 const db = require("./config/database");
-const userService = require("./services/user.service");
 
 async function checkConnection() {
   try {
     await db.authenticate();
     console.log("Database connected successfully");
+    await db.sync();
   }
   catch (error) {
     console.error("Database connection failed:", error);

@@ -1,9 +1,11 @@
-const Invoice = require("../models/invoice.model");
-const InvoiceDetail = require("../models/invoiceDetail.model");
-const ServiceRegistration = require("../models/serviceRegistration.model");
-const ServiceType = require("../models/serviceType.model");
-const Apartment = require("../models/apartment.model");
-const ApartmentType = require("../models/apartmentType.model");
+const { 
+  Invoice, 
+  InvoiceDetail, 
+  ServiceRegistration, 
+  ServiceType, 
+  Apartment, 
+  ApartmentType 
+} = require("../models");
 const invoiceFieldConfig = require("../config/fieldConfig/invoice.fieldconfig");
 const apiError = require("../utils/apiError");
 const httpStatus= require("http-status");
@@ -191,7 +193,29 @@ const getInvoiceById = async (invoiceId) => {
       throw new apiError(400, "Invoice Id is required");
     }
 
-    const invoice = await Invoice.findByPk(invoiceId);
+    const invoice = await Invoice.findByPk(invoiceId, {
+      include: [
+        {
+          model: Apartment,
+          as: 'apartment',
+          attributes: ['apartmentNumber', 'floor', 'building'],
+          include: [{
+            model: ApartmentType,
+            as: 'apartmentType',
+            attributes: ['typeName', 'rentFee', 'area']
+          }]
+        },
+        {
+          model: InvoiceDetail,
+          as: 'invoiceDetails',
+          include: [{
+            model: ServiceType,
+            as: 'serviceType',
+            attributes: ['serviceName', 'unit', 'unitPrice']
+          }]
+        }
+      ]
+    });
 
     if (!invoice) {
       throw new apiError(404, "Invoice not found");
@@ -216,10 +240,22 @@ const getInvoices = async (limit, offset) => {
     const invoices = await Invoice.findAll({
       limit: limit,
       offset: offset,
-      order: [['createdAt', 'ASC']]
+      order: [['createdAt', 'ASC']],
+      include: [{
+        model: Apartment,
+        as: 'apartment',
+        attributes: ['apartmentNumber', 'floor', 'building']
+      }]
     });
 
-    return invoices;
+    const totalCount = await Invoice.count();
+
+    return {
+      data: invoices,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: Math.ceil(offset / limit) + 1,
+      totalCount: totalCount
+    };
   } catch (error) {
     throw new apiError(500, error.message);
   }
@@ -343,6 +379,7 @@ const queryInvoices = async (filter, options) => {
       offset,
       include: [{
         model: Apartment,
+        as: 'apartment',
         attributes: ['apartmentNumber', 'floor', 'building']
       }]
     });

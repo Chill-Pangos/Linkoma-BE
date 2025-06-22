@@ -44,15 +44,15 @@ Feedback.belongsTo(User, {
   as: 'user'
 });
 
-// User - Contract (One-to-Many)
-User.hasMany(Contract, {
-  foreignKey: 'residentId',
-  as: 'contracts'
+// User - Apartment (One-to-Many) - User can be assigned to apartment
+User.belongsTo(Apartment, {
+  foreignKey: 'apartmentId',
+  as: 'apartment'
 });
 
-Contract.belongsTo(User, {
-  foreignKey: 'residentId',
-  as: 'resident'
+Apartment.hasMany(User, {
+  foreignKey: 'apartmentId',
+  as: 'residents'
 });
 
 // Apartment - Contract (One-to-Many)
@@ -75,6 +75,17 @@ Contract.hasMany(Invoice, {
 Invoice.belongsTo(Contract, {
   foreignKey: 'contractId',
   as: 'contract'
+});
+
+// Apartment - Invoice (One-to-Many)
+Apartment.hasMany(Invoice, {
+  foreignKey: 'apartmentId',
+  as: 'invoices'
+});
+
+Invoice.belongsTo(Apartment, {
+  foreignKey: 'apartmentId',
+  as: 'apartment'
 });
 
 // Invoice - InvoiceDetail (One-to-Many)
