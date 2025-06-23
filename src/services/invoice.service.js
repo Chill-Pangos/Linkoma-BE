@@ -198,7 +198,7 @@ const getInvoiceById = async (invoiceId) => {
         {
           model: Apartment,
           as: 'apartment',
-          attributes: ['apartmentNumber', 'floor', 'building'],
+          attributes: ['apartmentId', 'floor', 'building'],
           include: [{
             model: ApartmentType,
             as: 'apartmentType',
@@ -244,7 +244,7 @@ const getInvoices = async (limit, offset) => {
       include: [{
         model: Apartment,
         as: 'apartment',
-        attributes: ['apartmentNumber', 'floor', 'building']
+        attributes: ['apartmentId', 'floor', 'building']
       }]
     });
 
@@ -380,7 +380,7 @@ const queryInvoices = async (filter, options) => {
       include: [{
         model: Apartment,
         as: 'apartment',
-        attributes: ['apartmentNumber', 'floor', 'building']
+        attributes: ['apartmentId', 'floor', 'building']
       }]
     });
 
