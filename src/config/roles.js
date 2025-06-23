@@ -7,7 +7,6 @@ const allRoles = {
     "createFeedbacks",
     "getFeedbacks",
     "manageFeedbacks",
-    "viewInvoices",
     "getInvoices",
     "getInvoiceDetails",
     "viewServices",
