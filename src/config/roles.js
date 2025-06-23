@@ -2,6 +2,8 @@ const allRoles = {
   resident: [
     "getProfile",
     "updateProfile",
+    "getUsers",
+    "manageUsers",
     "viewAnnouncements",
     "viewContracts",
     "createFeedbacks",

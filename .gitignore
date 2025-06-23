@@ -132,3 +132,6 @@ dist
 
 # certificates
 *.pem
+
+# Google service account key
+serviceAccountKey.json

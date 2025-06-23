@@ -9,6 +9,7 @@ const InvoiceDetail = require('./invoiceDetail.model');
 const ServiceRegistration = require('./serviceRegistration.model');
 const ServiceType = require('./serviceType.model');
 const Token = require('./tokens.model');
+const PushToken = require('./pushToken.model');
 
 // Define associations
 // ApartmentType - Apartment (One-to-Many)
@@ -143,6 +144,17 @@ Token.belongsTo(User, {
   as: 'user'
 });
 
+// User - PushToken (One-to-Many)
+User.hasMany(PushToken, {
+  foreignKey: 'userId',
+  as: 'pushTokens'
+});
+
+PushToken.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
 module.exports = {
   User,
   Apartment,
@@ -155,4 +167,5 @@ module.exports = {
   ServiceRegistration,
   ServiceType,
   Token,
+  PushToken
 };
