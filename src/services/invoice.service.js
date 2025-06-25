@@ -50,7 +50,7 @@ const createInvoiceWithDetails = async (invoiceData) => {
     const serviceRegistrations = await ServiceRegistration.findAll({
       where: {
         apartmentId,
-        status: 'Active'
+        status: 'Active',
       },
       include: [{
         model: ServiceType,

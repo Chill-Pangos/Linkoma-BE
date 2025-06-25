@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
-const tokenService = require("../services/token.service");
+const jwt = require('jsonwebtoken');
+const config = require('../config/config');
 const { tokenTypes } = require("../config/tokens");
 const apiError = require("../utils/apiError");
 const httpStatus = require("http-status");
@@ -26,31 +27,35 @@ const refreshTokenRateLimit = rateLimit({
     }
 
     try {
-      const payload = tokenService.verifyToken(
-        refreshToken,
-        tokenTypes.REFRESH
-      );
+      const payload = jwt.verify(refreshToken, config.jwt.secret);
+      // Kiểm tra loại token
+      if (payload.type !== tokenTypes.REFRESH) {
+        return req.ip;
+      }
       return payload.userId || payload.sub;
     } catch (err) {
+      // Nếu không thể verify token, sử dụng IP làm key
       return req.ip;
     }
   },
 
   skip: (req) => {
     const accessToken = req.headers.authorization?.replace("Bearer ", "");
-    const refreshToken = req.cookies?.refreshToken;
-
-    if (!accessToken && !refreshToken) return false;
+    
+    // Chỉ skip rate limiting nếu có access token hợp lệ (chưa hết hạn)
+    if (!accessToken) return false;
 
     try {
-      if (accessToken) {
-        tokenService.verifyToken(accessToken, tokenTypes.ACCESS);
+      const payload = jwt.verify(accessToken, config.jwt.secret);
+      // Kiểm tra loại token và còn hạn
+      if (payload.type === tokenTypes.ACCESS) {
+        // Nếu access token còn hợp lệ, skip rate limiting vì không cần refresh
+        return true;
       }
-      if (refreshToken) {
-        tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-      }
-      return true;
+      return false;
     } catch (err) {
+      // Nếu access token không hợp lệ hoặc hết hạn, không skip rate limiting
+      // vì user sẽ cần sử dụng refresh token
       return false;
     }
   },
