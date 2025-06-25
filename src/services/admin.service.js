@@ -5,6 +5,7 @@ const {
   Apartment,
   ApartmentType,
   ServiceRegistration,
+  User,
 } = require("../models");
 const { Op, Sequelize } = require("sequelize");
 const apiError = require("../utils/apiError");
@@ -590,10 +591,10 @@ const getDashboardOverview = async (filter = {}) => {
   // Total apartments
   const totalApartments = await Apartment.count();
 
-  // Total residents (users with 'user' role)
-  const totalResidents = await Apartment.count({
+  // Total residents (users with 'resident' role)
+  const totalResidents = await User.count({
     where: {
-      status: 'rented'
+      role: 'resident'
     }
   });
 
@@ -871,8 +872,8 @@ const getDashboardMainStats = async (filter = {}) => {
     ((totalCurrentRevenue - totalPrevRevenue) / totalPrevRevenue * 100).toFixed(1) : 0;
 
   // 2. Residents (Cư dân)
-  const totalResidents = await Apartment.count({
-    where: { status: 'rented' }
+  const totalResidents = await User.count({
+    where: { role: 'resident' }
   });
 
   // 3. Occupied Apartments (Căn hộ có cư dân)
