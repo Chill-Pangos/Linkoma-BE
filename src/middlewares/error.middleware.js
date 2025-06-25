@@ -59,7 +59,8 @@ const errorConverter = (err, req, res, next) => {
 const errorHandler = (err, req, res, next) => {
   let { statusCode, message } = err;
 
-  if (!statusCode) {
+  // Ensure statusCode is always a valid number
+  if (!statusCode || isNaN(statusCode)) {
     statusCode = 500;
   }
 

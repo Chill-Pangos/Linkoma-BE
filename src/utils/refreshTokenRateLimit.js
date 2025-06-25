@@ -27,14 +27,15 @@ const refreshTokenRateLimit = rateLimit({
     }
 
     try {
+      // Use jwt.verify directly since keyGenerator must be synchronous
+      // but we still want to validate the token format
       const payload = jwt.verify(refreshToken, config.jwt.secret);
-      // Kiểm tra loại token
-      if (payload.type !== tokenTypes.REFRESH) {
-        return req.ip;
+      if (payload.type === tokenTypes.REFRESH) {
+        return payload.userId || payload.sub || req.ip;
       }
-      return payload.userId || payload.sub;
+      return req.ip;
     } catch (err) {
-      // Nếu không thể verify token, sử dụng IP làm key
+      // If token is invalid or expired, use IP as fallback
       return req.ip;
     }
   },
@@ -42,20 +43,15 @@ const refreshTokenRateLimit = rateLimit({
   skip: (req) => {
     const accessToken = req.headers.authorization?.replace("Bearer ", "");
     
-    // Chỉ skip rate limiting nếu có access token hợp lệ (chưa hết hạn)
+    // Skip rate limiting if there's a valid (non-expired) access token
     if (!accessToken) return false;
-
+    
     try {
       const payload = jwt.verify(accessToken, config.jwt.secret);
-      // Kiểm tra loại token và còn hạn
-      if (payload.type === tokenTypes.ACCESS) {
-        // Nếu access token còn hợp lệ, skip rate limiting vì không cần refresh
-        return true;
-      }
-      return false;
+      // If access token is valid and of correct type, skip rate limiting
+      return payload.type === tokenTypes.ACCESS;
     } catch (err) {
-      // Nếu access token không hợp lệ hoặc hết hạn, không skip rate limiting
-      // vì user sẽ cần sử dụng refresh token
+      // If access token is invalid or expired, apply rate limiting
       return false;
     }
   },
