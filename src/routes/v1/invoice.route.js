@@ -85,7 +85,7 @@ module.exports = router;
  * /invoices:
  *   post:
  *     summary: Create an invoice
- *     description: Only users with manageInvoices permission can create invoices.
+ *     description: Only users with manageInvoices permission can create invoices. Due date will be automatically set to 7 days from creation date if not provided.
  *     tags: [Invoices]
  *     security:
  *       - bearerAuth: []
@@ -97,7 +97,6 @@ module.exports = router;
  *             type: object
  *             required:
  *               - apartmentId
- *               - dueDate
  *             properties:
  *               apartmentId:
  *                 type: integer
@@ -108,6 +107,7 @@ module.exports = router;
  *               dueDate:
  *                 type: string
  *                 format: date
+ *                 description: Due date (optional - defaults to 7 days from creation)
  *               status:
  *                 type: string
  *                 enum: [Paid, Unpaid, Overdue]
@@ -115,7 +115,6 @@ module.exports = router;
  *               apartmentId: 1
  *               rentFee: 1000
  *               serviceFee: 200
- *               dueDate: "2025-07-01"
  *               status: "Unpaid"
  *     responses:
  *       "201":
@@ -129,6 +128,18 @@ module.exports = router;
  *                   type: string
  *                 invoiceId:
  *                   type: integer
+ *                 dueDate:
+ *                   type: string
+ *                   format: date
+ *                   description: Auto-generated due date (7 days from creation)
+ *                 rentFee:
+ *                   type: number
+ *                 serviceFee:
+ *                   type: number
+ *                 totalAmount:
+ *                   type: number
+ *                 status:
+ *                   type: string
  *       "400":
  *         $ref: '#/components/responses/BadRequest'
  *       "401":
@@ -218,7 +229,7 @@ module.exports = router;
  * /invoices/with-details:
  *   post:
  *     summary: Create an invoice with details
- *     description: Only users with manageInvoices permission can create invoices with details based on provided service usages. Rent fee is automatically taken from apartment type.
+ *     description: Only users with manageInvoices permission can create invoices with details based on provided service usages. Rent fee is automatically taken from apartment type. Due date is automatically set to 7 days from creation.
  *     tags: [Invoices]
  *     security:
  *       - bearerAuth: []
@@ -230,16 +241,11 @@ module.exports = router;
  *             type: object
  *             required:
  *               - apartmentId
- *               - dueDate
  *               - serviceUsages
  *             properties:
  *               apartmentId:
  *                 type: integer
  *                 description: ID of the apartment
- *               dueDate:
- *                 type: string
- *                 format: date
- *                 description: Due date for the invoice
  *               serviceUsages:
  *                 type: array
  *                 description: Array of service usage data
@@ -257,7 +263,6 @@ module.exports = router;
  *                       description: Usage amount for this service
  *             example:
  *               apartmentId: 1
- *               dueDate: "2025-07-01"
  *               serviceUsages:
  *                 - serviceTypeId: 1
  *                   usage: 150
@@ -275,6 +280,10 @@ module.exports = router;
  *                   type: string
  *                 invoiceId:
  *                   type: integer
+ *                 dueDate:
+ *                   type: string
+ *                   format: date
+ *                   description: Auto-generated due date (7 days from creation)
  *                 rentFee:
  *                   type: number
  *                 serviceFee:

@@ -21,7 +21,7 @@ const createInvoice = {
   body: Joi.object().keys({
     apartmentId: Joi.number().integer().positive().required(),
     rentFee: Joi.number().positive().precision(2),
-    dueDate: Joi.date().required(),
+    dueDate: Joi.date().optional(),
     status: Joi.string().valid('Unpaid', 'Paid').default('Unpaid'),
     serviceUsages: Joi.array().items(
       Joi.object().keys({
@@ -35,7 +35,6 @@ const createInvoice = {
 const createInvoiceWithDetails = {
   body: Joi.object().keys({
     apartmentId: Joi.number().integer().positive().required(),
-    dueDate: customJoi.date().today().required(),
     serviceUsages: Joi.array().items(
       Joi.object().keys({
         serviceTypeId: Joi.number().integer().positive().required(),

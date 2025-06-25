@@ -11,6 +11,7 @@ const apiError = require("../utils/apiError");
 const httpStatus= require("http-status");
 const { Op } = require("sequelize");
 const filterValidFields = require("../utils/filterValidFields");
+const dayjs = require("dayjs");
 
 /**
  * @description Create a new invoice in the database
@@ -31,7 +32,10 @@ const createInvoiceWithDetails = async (invoiceData) => {
   const transaction = await Invoice.sequelize.transaction();
   
   try {
-    const { apartmentId, dueDate, serviceUsages } = invoiceData;
+    const { apartmentId, serviceUsages } = invoiceData;
+
+    // Auto generate dueDate as 7 days from now
+    const dueDate = dayjs().add(7, 'day').format('YYYY-MM-DD');
 
     // Validate apartment exists
     const apartment = await Apartment.findByPk(apartmentId, {
@@ -126,6 +130,7 @@ const createInvoiceWithDetails = async (invoiceData) => {
     return {
       message: "Invoice with details created successfully",
       invoiceId: invoice.invoiceId,
+      dueDate: dueDate,
       rentFee: rentFee,
       serviceFee: totalServiceFee,
       totalAmount: rentFee + totalServiceFee,
@@ -151,6 +156,11 @@ const createInvoiceWithDetails = async (invoiceData) => {
 
 const createInvoice = async (invoiceData) => {
   try {
+    // Auto generate dueDate as 7 days from now if not provided
+    if (!invoiceData.dueDate) {
+      invoiceData.dueDate = dayjs().add(7, 'day').format('YYYY-MM-DD');
+    }
+
     const fields = filterValidFields.filterValidFieldsFromObject(
       invoiceData,
       invoiceFieldConfig.insertableFields
@@ -174,6 +184,11 @@ const createInvoice = async (invoiceData) => {
     return {
       message: "Invoice created successfully",
       invoiceId: result.invoiceId,
+      dueDate: result.dueDate,
+      rentFee: result.rentFee,
+      serviceFee: result.serviceFee,
+      totalAmount: (result.rentFee || 0) + (result.serviceFee || 0),
+      status: result.status
     };
   } catch (error) {
     throw new apiError(500, error.message);
