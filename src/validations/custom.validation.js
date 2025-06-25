@@ -24,8 +24,23 @@ const objectId = (value, helpers) => {
   return value;
 };
 
+const validateTodayDate = (value, helpers) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day
+
+  const inputDate = new Date(value);
+  inputDate.setHours(0, 0, 0, 0); // Set to start of day
+
+  if (inputDate.getTime() !== today.getTime()) {
+    return helpers.error("date.today");
+  }
+
+  return value;
+};
+
 module.exports = {
   password,
   emails,
   objectId,
+  validateTodayDate
 };

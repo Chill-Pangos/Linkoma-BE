@@ -202,9 +202,11 @@ const queryInvoiceDetails = async (filter, options) => {
       offset,
       include: [{
         model: ServiceType,
+        as: 'serviceType',
         attributes: ['serviceName', 'unit', 'unitPrice']
       }, {
         model: Invoice,
+        as: 'invoice',
         attributes: ['invoiceId', 'apartmentId', 'status', 'dueDate']
       }]
     });

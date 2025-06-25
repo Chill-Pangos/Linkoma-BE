@@ -1,4 +1,21 @@
 const Joi = require('joi');
+const { validateTodayDate } = require('../validations/custom.validation');
+
+const customJoi = Joi.extend({
+  type: "date",
+  base: Joi.date(),
+  messages: {
+    "date.today": "Due date must be today's date",
+  },
+  rules: {
+    today: {
+      method() {
+        return this.$_addRule("today");
+      },
+      validate: validateTodayDate,
+    },
+  },
+});
 
 const createInvoice = {
   body: Joi.object().keys({
@@ -18,7 +35,7 @@ const createInvoice = {
 const createInvoiceWithDetails = {
   body: Joi.object().keys({
     apartmentId: Joi.number().integer().positive().required(),
-    dueDate: Joi.date().required(),
+    dueDate: customJoi.date().today().required(),
     serviceUsages: Joi.array().items(
       Joi.object().keys({
         serviceTypeId: Joi.number().integer().positive().required(),
