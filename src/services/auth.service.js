@@ -43,6 +43,10 @@ const login = async (email, password) => {
       refresh: Tokens.refresh,
     };
   } catch (error) {
+    // Re-throw apiError as is, only wrap non-apiError exceptions
+    if (error instanceof apiError) {
+      throw error;
+    }
     throw new apiError(500, error.message);
   }
 };

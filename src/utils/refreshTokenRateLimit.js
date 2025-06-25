@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
-const tokenService = require("../services/token.service");
+const jwt = require('jsonwebtoken');
+const config = require('../config/config');
 const { tokenTypes } = require("../config/tokens");
 const apiError = require("../utils/apiError");
 const httpStatus = require("http-status");
@@ -26,31 +27,31 @@ const refreshTokenRateLimit = rateLimit({
     }
 
     try {
-      const payload = tokenService.verifyToken(
-        refreshToken,
-        tokenTypes.REFRESH
-      );
-      return payload.userId || payload.sub;
+      // Use jwt.verify directly since keyGenerator must be synchronous
+      // but we still want to validate the token format
+      const payload = jwt.verify(refreshToken, config.jwt.secret);
+      if (payload.type === tokenTypes.REFRESH) {
+        return payload.userId || payload.sub || req.ip;
+      }
+      return req.ip;
     } catch (err) {
+      // If token is invalid or expired, use IP as fallback
       return req.ip;
     }
   },
 
   skip: (req) => {
     const accessToken = req.headers.authorization?.replace("Bearer ", "");
-    const refreshToken = req.cookies?.refreshToken;
-
-    if (!accessToken && !refreshToken) return false;
-
+    
+    // Skip rate limiting if there's a valid (non-expired) access token
+    if (!accessToken) return false;
+    
     try {
-      if (accessToken) {
-        tokenService.verifyToken(accessToken, tokenTypes.ACCESS);
-      }
-      if (refreshToken) {
-        tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-      }
-      return true;
+      const payload = jwt.verify(accessToken, config.jwt.secret);
+      // If access token is valid and of correct type, skip rate limiting
+      return payload.type === tokenTypes.ACCESS;
     } catch (err) {
+      // If access token is invalid or expired, apply rate limiting
       return false;
     }
   },

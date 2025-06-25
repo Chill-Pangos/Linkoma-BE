@@ -12,3 +12,4 @@ module.exports.invoiceService = require('./invoice.service');
 module.exports.invoiceDetailService = require('./invoiceDetail.service');
 module.exports.serviceRegistrationService = require('./serviceRegistration.service');
 module.exports.serviceTypeService = require('./serviceType.service');
+module.exports.adminService = require('./admin.service');

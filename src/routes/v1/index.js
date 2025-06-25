@@ -11,6 +11,7 @@ const serviceTypeRoute = require("./serviceType.route");
 const serviceRegistrationRoute = require("./serviceRegistration.route");
 const invoiceRoute = require("./invoice.route");
 const invoiceDetailRoute = require("./invoiceDetail.route");
+const adminRoute = require("./admin.route");
 
 const router = express.Router();
 
@@ -62,6 +63,10 @@ const defaultRoutes = [
     {
         path: "/invoice-details",
         route: invoiceDetailRoute,
+    },
+    {
+        path: "/admin",
+        route: adminRoute,
     }
 ];
 

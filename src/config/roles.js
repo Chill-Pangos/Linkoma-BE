@@ -65,6 +65,7 @@ const allRoles = {
     "viewReports",
     'respondToFeedbacks',
     "systemConfig",
+    "admin"
   ],
 };
 
