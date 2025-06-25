@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const Apartment = require("../models/apartment.model");
 const userFieldConfig = require("../config/fieldConfig/user.fieldconfig");
 const apiError = require("../utils/apiError");
 const httpStatus = require("http-status");
@@ -33,6 +34,20 @@ const createUser = async (userData) => {
 
     if (entries.length === 0) {
       throw new apiError(400, "No valid fields provided");
+    }
+
+    // If apartmentId is provided, validate apartment exists and update its status
+    if (fields.apartmentId) {
+      const apartment = await Apartment.findByPk(fields.apartmentId);
+      if (!apartment) {
+        throw new apiError(400, "Apartment not found");
+      }
+      
+      // Update apartment status to rented
+      await Apartment.update(
+        { status: 'rented' },
+        { where: { apartmentId: fields.apartmentId } }
+      );
     }
 
     const user = await User.create(fields);
@@ -163,6 +178,38 @@ const updateUser = async (userId, userData) => {
       throw new apiError(400, "No valid fields provided");
     }
 
+    // Get current user data to check previous apartmentId
+    const currentUser = await User.findByPk(userId);
+    if (!currentUser) {
+      throw new apiError(404, "User not found");
+    }
+
+    // Handle apartment status updates if apartmentId changes
+    if (fields.apartmentId !== undefined) {
+      // If user had a previous apartment, set it back to available
+      if (currentUser.apartmentId && currentUser.apartmentId !== fields.apartmentId) {
+        await Apartment.update(
+          { status: 'available' },
+          { where: { apartmentId: currentUser.apartmentId } }
+        );
+      }
+
+      // If user is assigned to a new apartment, set it to rented
+      if (fields.apartmentId) {
+        // Validate apartment exists
+        const apartment = await Apartment.findByPk(fields.apartmentId);
+        if (!apartment) {
+          throw new apiError(400, "Apartment not found");
+        }
+        
+        // Update apartment status to rented
+        await Apartment.update(
+          { status: 'rented' },
+          { where: { apartmentId: fields.apartmentId } }
+        );
+      }
+    }
+
     const [affectedRows] = await User.update(fields, {
       where: { userId: userId }
     });
@@ -189,6 +236,20 @@ const deleteUser = async (userId) => {
   try {
     if (!userId) {
       throw new apiError(400, "User ID is required");
+    }
+
+    // Get user data before deletion to check apartmentId
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new apiError(404, "User not found");
+    }
+
+    // If user has an apartment, set it back to available
+    if (user.apartmentId) {
+      await Apartment.update(
+        { status: 'available' },
+        { where: { apartmentId: user.apartmentId } }
+      );
     }
 
     const deletedRows = await User.destroy({
