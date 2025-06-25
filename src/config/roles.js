@@ -10,7 +10,7 @@ const allRoles = {
     "getInvoices",
     "getInvoiceDetails",
     "viewServices",
-    "registerService",
+    "manageServices",
     "getApartments",
     "getServiceTypes",
     "getServiceRegistrations",
